@@ -1,0 +1,14 @@
+body{
+    background: linear-gradient(150deg, rgb(49, 160, 204), rgb(57, 127, 155), rgb(3, 69, 97));
+    background-size: 400% 300%;
+    animation: BgGradient 3s ease infinite;
+    min-height: 100vh; 
+  }
+  
+  
+  @keyframes BgGradient {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  } 
+ 
