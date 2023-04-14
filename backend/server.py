@@ -23,6 +23,12 @@ def LoguearCliente(nombre, contrasenia):
     usuario = controlador.LoguearCliente(nombre, contrasenia)
     return jsonify({"respuesta":usuario})
 
+# Endpoint para obtener una empresa existente en la base de datos
+@app.route('/loguearEmpresa/<nombre>/<contrasenia>', methods=['GET'])
+def LoguearEmpresa(nombre, contrasenia):
+    empresa = controlador.LoguearEmpresa(nombre, contrasenia)
+    return jsonify({"respuesta":empresa})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
     
