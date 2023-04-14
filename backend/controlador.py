@@ -88,3 +88,14 @@ def VerMunicipios():
         municipios = [{"MUN_ID":municipio[0], "NOMBRE_MUNICIPIO":municipio[1], "DEP_ID":municipio[2], "NOMBRE_DEPARTAMENTO":municipio[3]}for municipio in municipios]
     conexion.close()
     return municipios
+
+# Controlador para ver todos los tipos de empresa en la base de datos
+def VerTiposEmpresa():
+    conexion = obtener_conexion()
+    tipos_empresa = []
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM TIPO_EMPRESA te")
+        tipos_empresa = cursor.fetchall()
+        tipos_empresa = [{"T_EMP_ID":tipo_empresa[0], "NOMBRE":tipo_empresa[1]}for tipo_empresa in tipos_empresa]
+    conexion.close()
+    return tipos_empresa
