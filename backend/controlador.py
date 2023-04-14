@@ -99,3 +99,67 @@ def VerTiposEmpresa():
         tipos_empresa = [{"T_EMP_ID":tipo_empresa[0], "NOMBRE":tipo_empresa[1]}for tipo_empresa in tipos_empresa]
     conexion.close()
     return tipos_empresa
+
+# Controlador para buscar una direccion existente en la base de datos
+def ObtenerDireccion(id_municipio, lugar):
+    conexion = obtener_conexion()
+    direccion = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT DIR_ID FROM DIRECCION d WHERE MUNICIPIO_MUN_ID = %s AND UPPER(LUGAR) = UPPER(%s)""", (id_municipio, lugar,))
+        direccion = cursor.fetchone()
+    conexion.close()
+    return direccion
+
+# Controlador para buscar un usuario de tipo empresa existente en la base de datos.
+def ObtenerUsuarioEmpresa(nombre_usuario):
+    conexion = obtener_conexion()
+    usuario = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT EMP_ID FROM EMPRESA e WHERE UPPER(USUARIO) = UPPER(%s)", (nombre_usuario,))
+        usuario = cursor.fetchone()
+    conexion.close()
+    return usuario
+
+# Controlador para agregar una direccion a la base de datos
+def AgregarDireccion(id_municipio, lugar):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("INSERT INTO DIRECCION(MUNICIPIO_MUN_ID, LUGAR) VALUES (%s, %s)",
+                       (id_municipio, lugar))
+        direccion_id = cursor.lastrowid
+    conexion.commit()
+    conexion.close()
+    return direccion_id
+
+# Controlador para insertar una empresa en la base de datos
+def AgregarEmpresa(id_direccion, id_tipo_empresa, nombre, descripcion, correo, telefono, usuario, contrasenia, nit, nombre_archivo):
+    conexion = obtener_conexion()
+    password_encriptado = generate_password_hash(contrasenia, "sha256", 30)
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO EMPRESA (DIRECCION_DIR_ID, TIPO_EMPRESA_T_EMP_ID, NOMBRE, DESCRIPCION, 
+        CORREO, TELEFONO, USUARIO, CONTRASENA, NIT, ESTADO, DOCUMENTO)
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", 
+        (id_direccion, id_tipo_empresa, nombre, descripcion, correo, telefono, usuario, password_encriptado, nit, "pendiente", nombre_archivo))
+        empresa_id = cursor.lastrowid
+    conexion.commit()
+    conexion.close()
+    return empresa_id
+
+# Controlador para insertar una solicitud en la base de datos
+def AgregarSolicitud(id_empresa, id_repartidor, tipo_solicitud, fecha, descripcion, estado):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO SOLICITUD 
+        (EMPRESA_EMP_ID, REPARTIDOR_REP_ID, TIPO_SOLICITUD, FECHA, DESCRIPCION, ESTADO)
+        VALUES(%s, %s, %s, %s, %s, %s)""", 
+        (id_empresa, id_repartidor, tipo_solicitud, fecha, descripcion, estado))
+    conexion.commit()
+    conexion.close()
+
+# Controlador para eliminar una empresa en la base de datos
+def EliminarEmpresa(id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("DELETE FROM EMPRESA WHERE EMP_ID = %s", (id,))
+    conexion.commit()
+    conexion.close()
