@@ -75,3 +75,16 @@ def VerDepartamentos():
         departamentos = [{"DEP_ID":departamento[0], "NOMBRE":departamento[1]}for departamento in departamentos]
     conexion.close()
     return departamentos
+
+# Controlador para ver todos los municipios en la base de datos
+def VerMunicipios():
+    conexion = obtener_conexion()
+    municipios = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT m.MUN_ID, m.NOMBRE AS NOMBRE_MUNICIPIO, d.DEP_ID, d.NOMBRE AS NOMBRE_DEPARTAMENTO
+        FROM MUNICIPIO m 
+        INNER JOIN DEPARTAMENTO d ON d.DEP_ID = m.DEPARTAMENTO_DEP_ID""")
+        municipios = cursor.fetchall()
+        municipios = [{"MUN_ID":municipio[0], "NOMBRE_MUNICIPIO":municipio[1], "DEP_ID":municipio[2], "NOMBRE_DEPARTAMENTO":municipio[3]}for municipio in municipios]
+    conexion.close()
+    return municipios

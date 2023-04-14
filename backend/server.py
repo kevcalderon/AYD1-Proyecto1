@@ -38,6 +38,15 @@ def MostrarDepartamentos():
     except Exception as e:
         return jsonify({'respuesta': "Error al obtener los departamentos" + e})
 
+# Endpoint para mostrar todos los municipios registrados en la base de datos
+@app.route('/mostrarMunicipios', methods=["GET"])
+def MostrarMunicipio():
+    try:
+        municipios = controlador.VerMunicipios()
+        return jsonify(municipios)
+    except Exception as e:
+        return jsonify({'respuesta': "Error al obtener los municipios" + e})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
     
