@@ -6,11 +6,27 @@ def LoguearCliente(nombre_usuario, contrasenia):
     conexion = obtener_conexion()
     usuario = None
     with conexion.cursor() as cursor:
-        cursor.execute(
-            "SELECT CLI_ID, CONTRASENA FROM CLIENTE c WHERE USUARIO = %s", (nombre_usuario,))
+        cursor.execute("""SELECT c.CONTRASENA, c.CLI_ID, c.NOMBRE, c.APELLIDO, c.CORREO, c.TELEFONO, c.USUARIO, c.NIT, c.TARJETA, c.ESTADO, d.DIR_ID, d.LUGAR
+                FROM CLIENTE c 
+                INNER JOIN DIRECCION d ON d.DIR_ID = c.DIRECCION_DIR_ID 
+                WHERE USUARIO = %s AND ESTADO = 'activo'
+                """, (nombre_usuario,))
         usuario = cursor.fetchone()
-        if usuario and check_password_hash(usuario[1], contrasenia):
-            usuario = usuario[0]
+        if usuario and check_password_hash(usuario[0], contrasenia):
+            usuario = {
+                # 'CONTRASENA': usuario[0],
+                'CLI_ID': usuario[1],
+                'NOMBRE': usuario[2],
+                'APELLIDO': usuario[3],
+                'CORREO': usuario[4],
+                'TELEFONO': usuario[5],
+                'USUARIO': usuario[6],                
+                'NIT': usuario[7],
+                'TARJETA': usuario[8],
+                # 'ESTADO': usuario[9],
+                'DIR_ID': usuario[10],
+                'LUGAR': usuario[11]
+            }
         else:
             usuario = None
     conexion.close()
