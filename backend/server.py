@@ -29,6 +29,15 @@ def LoguearEmpresa(nombre, contrasenia):
     empresa = controlador.LoguearEmpresa(nombre, contrasenia)
     return jsonify({"respuesta":empresa})
 
+# Endpoint para mostrar todos los departamentos registrados en la base de datos
+@app.route('/mostrarDepartamentos', methods=["GET"])
+def MostrarDepartamentos():
+    try:
+        departamentos = controlador.VerDepartamentos()
+        return jsonify(departamentos)
+    except Exception as e:
+        return jsonify({'respuesta': "Error al obtener los departamentos" + e})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
     

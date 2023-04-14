@@ -64,3 +64,14 @@ def LoguearEmpresa(nombre_empresa, contrasenia):
             empresa = None
     conexion.close()
     return empresa
+
+# Controlador para ver todos los departamentos en la base de datos
+def VerDepartamentos():
+    conexion = obtener_conexion()
+    departamentos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM DEPARTAMENTO d")
+        departamentos = cursor.fetchall()
+        departamentos = [{"DEP_ID":departamento[0], "NOMBRE":departamento[1]}for departamento in departamentos]
+    conexion.close()
+    return departamentos
