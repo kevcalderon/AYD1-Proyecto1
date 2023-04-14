@@ -47,6 +47,15 @@ def MostrarMunicipio():
     except Exception as e:
         return jsonify({'respuesta': "Error al obtener los municipios" + e})
 
+# Endpoint para mostrar todos los tipos de empresas registrados en la base de datos
+@app.route('/mostrarTiposEmpresa', methods=["GET"])
+def MostrarTipoEmpresa():
+    try:
+        tipos_empresa = controlador.VerTiposEmpresa()
+        return jsonify(tipos_empresa)
+    except Exception as e:
+        return jsonify({'respuesta': "Error al obtener los tipos de empresa" + e})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
     
