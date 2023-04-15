@@ -117,6 +117,20 @@ def inicioSesionAdmin(USER, CONTRA):
     except Exception as e:        
         return jsonify({'exito':False, "msg": "Error al intentar iniciar sesion: " + str(e)})
 
+#Endpoint para comprobar si la contrasenia y usuario admin son correctos
+@app.route('/inicioSesionRepartidor/<USER>/<CONTRA>', methods=['GET'])
+def inicioSesionProveedor(USER, CONTRA):
+    try:
+        proveedor=controlador.VerificarSesProveedor(USER, CONTRA)
+        if  proveedor != None:
+            return jsonify({'exito':True, "respuesta":proveedor})
+        else:
+            return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
+        
+    except Exception as e:        
+        return jsonify({'exito':False, "msg": "Error al intentar iniciar sesion: " + str(e)})
+
+
 def archivo_permitido(name):
     name = name.split('.')
     if(name[-1] in ALLOWED_EXTENSIONS):
