@@ -163,3 +163,13 @@ def EliminarEmpresa(id):
         cursor.execute("DELETE FROM EMPRESA WHERE EMP_ID = %s", (id,))
     conexion.commit()
     conexion.close()
+    
+# Controlador para verificar los datos del admin en la base de datos
+def VerificarSesAdmin(usuario, contrasenia):
+    conexion = obtener_conexion()    
+    with conexion.cursor() as cursor:
+        print(usuario, contrasenia)
+        cursor.execute("SELECT * FROM ADMINISTRADOR WHERE USUARIO = %s and CONTRASENA = %s", (usuario,contrasenia,))
+        usuario = cursor.fetchone()
+    conexion.close()
+    return usuario

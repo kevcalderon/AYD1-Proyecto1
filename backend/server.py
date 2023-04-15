@@ -104,6 +104,19 @@ def CrearEmpresa():
         controlador.EliminarEmpresa(id_empresa)
         return jsonify({'exito':False, "msg": "Error al crear su usuario: " + str(e)})
 
+#Endpoint para comprobar si la contrasenia y usuario admin son correctos
+@app.route('/inicioSesionAdmin/<USER>/<CONTRA>', methods=['GET'])
+def inicioSesionAdmin(USER, CONTRA):
+    try:
+        usuario=controlador.VerificarSesAdmin(USER, CONTRA)
+        if  usuario != None:
+            return jsonify({'exito':True, "respuesta":{'USUARIO': usuario[0]}})
+        else:
+            return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
+        
+    except Exception as e:        
+        return jsonify({'exito':False, "msg": "Error al intentar iniciar sesion: " + str(e)})
+
 def archivo_permitido(name):
     name = name.split('.')
     if(name[-1] in ALLOWED_EXTENSIONS):
