@@ -120,6 +120,19 @@ def ObtenerUsuarioEmpresa(nombre_usuario):
     conexion.close()
     return usuario
 
+# Controlador para ver todos los municipios segun el departamento
+def ObtenerMunicipios(id_departamento):
+    conexion = obtener_conexion()
+    municipios = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT m.MUN_ID, m.NOMBRE AS NOMBRE_MUNICIPIO
+        FROM MUNICIPIO m 
+        WHERE m.DEPARTAMENTO_DEP_ID = %s""", (id_departamento, ))
+        municipios = cursor.fetchall()
+        municipios = [{"MUN_ID":municipio[0], "NOMBRE_MUNICIPIO":municipio[1]}for municipio in municipios]
+    conexion.close()
+    return municipios
+
 # Controlador para agregar una direccion a la base de datos
 def AgregarDireccion(id_municipio, lugar):
     conexion = obtener_conexion()
