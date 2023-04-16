@@ -106,7 +106,7 @@ def CrearEmpresa():
             hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") # Obtiene la hora actual como una cadena en el formato "YYYY-MM-DD-HH-MM-SS"
             nombre_archivo = hora_actual + '_' + filename # Concatena la hora actual y el nombre de archivo original
             documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
-        
+
         id_empresa = controlador.AgregarEmpresa(id_direccion, id_tipo_empresa, nombre, descripcion, correo, telefono, usuario, contrasenia, nit, nombre_archivo)
         controlador.AgregarSolicitud(id_empresa, None, "empresa", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo empresa", "pendiente")
         return jsonify({"exito":True, "msg":"Se ha creado su usuario correctamente. Le pedimos que aguarde la confirmación de su cuenta"})
@@ -123,8 +123,8 @@ def inicioSesionAdmin(USER, CONTRA):
             return jsonify({'exito':True, "respuesta":{'USUARIO': usuario[0]}})
         else:
             return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
-        
-    except Exception as e:        
+
+    except Exception as e:
         return jsonify({'exito':False, "msg": "Error al intentar iniciar sesion: " + str(e)})
 
 #Endpoint para comprobar si la contrasenia y usuario admin son correctos
@@ -136,8 +136,8 @@ def inicioSesionProveedor(USER, CONTRA):
             return jsonify({'exito':True, "respuesta":proveedor})
         else:
             return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
-        
-    except Exception as e:        
+
+    except Exception as e:
         return jsonify({'exito':False, "msg": "Error al intentar iniciar sesion: " + str(e)})
 
 
@@ -208,8 +208,6 @@ def registrarRepartidor():
         "message": "Ocurrio un error inesperado, intentelo denuevo."
         })
 
-
-
 @app.route('/registrarCliente', methods=['POST'])
 def registrarCliente():
     info = request.json
@@ -243,6 +241,14 @@ def registrarCliente():
         "message": "Ocurrio un error inesperado, intentelo denuevo."
         })
 
+# Endpoint para eliminar un producto en la base de datos
+@app.route('/eliminarProducto/<id_producto>', methods=["DELETE"])
+def EliminarProducto(id_producto):
+    try:
+        controlador.EliminarProducto(id_producto)
+        return jsonify({"exito":True, "msg":"Se ha eliminado correctamente su producto."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al eliminar su producto: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")

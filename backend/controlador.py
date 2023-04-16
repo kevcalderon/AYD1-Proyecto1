@@ -177,6 +177,14 @@ def EliminarEmpresa(id):
     conexion.commit()
     conexion.close()
 
+# Controlador para eliminar un producto segun su id
+def EliminarProducto(id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("DELETE FROM PRODUCTO WHERE PRO_ID = %s", (id,))
+    conexion.commit()
+    conexion.close()
+
 # Controlador para insertar un producto en la base de datos
 def AgregarProducto(id_empresa, id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo):
     conexion = obtener_conexion()
