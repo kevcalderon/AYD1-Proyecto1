@@ -138,9 +138,9 @@ def ObtenerProductosEmpresa(id_empresa):
     conexion = obtener_conexion()
     productos_empresa = []
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT p.PRO_ID, p.NOMBRE AS NOMBRE_PRODUCTO, p.DESCRIPCION, p.PRECIO, p.STOCK, 
+        cursor.execute("""SELECT p.PRO_ID, p.NOMBRE AS NOMBRE_PRODUCTO, p.DESCRIPCION, p.PRECIO, p.STOCK,
         p.FOTOGRAFIA, tp.T_PRO_ID, tp.NOMBRE AS NOMBRE_TIPO_PRODUCTO
-        FROM PRODUCTO p 
+        FROM PRODUCTO p
         INNER JOIN TIPO_PRODUCTO tp ON tp.T_PRO_ID = p.TIPO_PRODUCTO_T_PRO_ID
         WHERE p.EMPRESA_EMP_ID = %s""", (id_empresa, ))
         productos_empresa = cursor.fetchall()
@@ -271,3 +271,13 @@ def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, i
     conexion.commit()
     conexion.close()
 
+# Controlador para actualizar un producto en la base de datos
+def ActualizarProducto(id_producto, id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE proyecto_db.PRODUCTO
+        SET TIPO_PRODUCTO_T_PRO_ID=%s, NOMBRE=%s, DESCRIPCION=%s, PRECIO=%s, STOCK=%s, FOTOGRAFIA=%s
+        WHERE PRO_ID=%s""",
+        (id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo, id_producto))
+    conexion.commit()
+    conexion.close()

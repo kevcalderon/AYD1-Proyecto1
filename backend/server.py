@@ -259,6 +259,31 @@ def EliminarProducto(id_producto):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al eliminar su producto: " + str(e)})
 
+@app.route('/actualizarProducto/<id_producto>', methods=["PUT"])
+def ActualizarProducto(id_producto):
+    try:
+        id_tipo_producto = request.form['id_tipo_producto']
+        nombre = request.form['nombre']
+        descripcion = request.form['descripcion']
+        precio = request.form['precio']
+        stock = request.form['stock']
+
+        nombre_archivo = None
+        if('documento' in request.files):
+            documento = request.files['documento']
+            filename = secure_filename(documento.filename)
+            if(not archivo_permitido(filename)):
+                return jsonify({"exito":False, "msg":"La extensión del archivo no esta permitido"})
+
+            hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") # Obtiene la hora actual como una cadena en el formato "YYYY-MM-DD-HH-MM-SS"
+            nombre_archivo = hora_actual + '_' + filename # Concatena la hora actual y el nombre de archivo original
+            documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
+
+        controlador.ActualizarProducto(id_producto, id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo)
+        return jsonify({"exito":True, "msg":"El producto ha sido actualizado correctamente."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al actualizar el producto: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
