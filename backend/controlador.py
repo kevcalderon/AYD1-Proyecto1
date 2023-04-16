@@ -7,8 +7,8 @@ def LoguearCliente(nombre_usuario, contrasenia):
     usuario = None
     with conexion.cursor() as cursor:
         cursor.execute("""SELECT c.CONTRASENA, c.CLI_ID, c.NOMBRE, c.APELLIDO, c.CORREO, c.TELEFONO, c.USUARIO, c.NIT, c.TARJETA, c.ESTADO, d.DIR_ID, d.LUGAR
-                FROM CLIENTE c 
-                INNER JOIN DIRECCION d ON d.DIR_ID = c.DIRECCION_DIR_ID 
+                FROM CLIENTE c
+                INNER JOIN DIRECCION d ON d.DIR_ID = c.DIRECCION_DIR_ID
                 WHERE USUARIO = %s AND ESTADO = 'activo'
                 """, (nombre_usuario,))
         usuario = cursor.fetchone()
@@ -20,7 +20,7 @@ def LoguearCliente(nombre_usuario, contrasenia):
                 'APELLIDO': usuario[3],
                 'CORREO': usuario[4],
                 'TELEFONO': usuario[5],
-                'USUARIO': usuario[6],                
+                'USUARIO': usuario[6],
                 'NIT': usuario[7],
                 'TARJETA': usuario[8],
                 # 'ESTADO': usuario[9],
@@ -37,10 +37,10 @@ def LoguearEmpresa(nombre_empresa, contrasenia):
     conexion = obtener_conexion()
     empresa = None
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT e.CONTRASENA, e.EMP_ID, e.NOMBRE AS NOMBRE_EMPRESA, e.DESCRIPCION, e.CORREO, e.TELEFONO, e.USUARIO, e.NIT, e.ESTADO, e.DOCUMENTO, 
-            te.T_EMP_ID, te.NOMBRE AS NOMBRE_TIPO_EMPRESA, d.DIR_ID, d.LUGAR 
+        cursor.execute("""SELECT e.CONTRASENA, e.EMP_ID, e.NOMBRE AS NOMBRE_EMPRESA, e.DESCRIPCION, e.CORREO, e.TELEFONO, e.USUARIO, e.NIT, e.ESTADO, e.DOCUMENTO,
+            te.T_EMP_ID, te.NOMBRE AS NOMBRE_TIPO_EMPRESA, d.DIR_ID, d.LUGAR
             FROM EMPRESA e
-            INNER JOIN TIPO_EMPRESA te ON te.T_EMP_ID = e.TIPO_EMPRESA_T_EMP_ID 
+            INNER JOIN TIPO_EMPRESA te ON te.T_EMP_ID = e.TIPO_EMPRESA_T_EMP_ID
             INNER JOIN DIRECCION d ON d.DIR_ID = e.DIRECCION_DIR_ID  WHERE USUARIO = %s AND ESTADO = 'activo'""", (nombre_empresa,))
         empresa = cursor.fetchone()
         if empresa and check_password_hash(empresa[0], contrasenia):
@@ -51,7 +51,7 @@ def LoguearEmpresa(nombre_empresa, contrasenia):
                 'DESCRIPCION': empresa[3],
                 'CORREO': empresa[4],
                 'TELEFONO': empresa[5],
-                'USUARIO': empresa[6],                
+                'USUARIO': empresa[6],
                 'NIT': empresa[7],
                 # 'ESTADO': empresa[8],
                 'DOCUMENTO': empresa[9],
@@ -82,7 +82,7 @@ def VerMunicipios():
     municipios = []
     with conexion.cursor() as cursor:
         cursor.execute("""SELECT m.MUN_ID, m.NOMBRE AS NOMBRE_MUNICIPIO, d.DEP_ID, d.NOMBRE AS NOMBRE_DEPARTAMENTO
-        FROM MUNICIPIO m 
+        FROM MUNICIPIO m
         INNER JOIN DEPARTAMENTO d ON d.DEP_ID = m.DEPARTAMENTO_DEP_ID""")
         municipios = cursor.fetchall()
         municipios = [{"MUN_ID":municipio[0], "NOMBRE_MUNICIPIO":municipio[1], "DEP_ID":municipio[2], "NOMBRE_DEPARTAMENTO":municipio[3]}for municipio in municipios]
@@ -126,7 +126,7 @@ def ObtenerMunicipios(id_departamento):
     municipios = []
     with conexion.cursor() as cursor:
         cursor.execute("""SELECT m.MUN_ID, m.NOMBRE AS NOMBRE_MUNICIPIO
-        FROM MUNICIPIO m 
+        FROM MUNICIPIO m
         WHERE m.DEPARTAMENTO_DEP_ID = %s""", (id_departamento, ))
         municipios = cursor.fetchall()
         municipios = [{"MUN_ID":municipio[0], "NOMBRE_MUNICIPIO":municipio[1]}for municipio in municipios]
@@ -149,9 +149,9 @@ def AgregarEmpresa(id_direccion, id_tipo_empresa, nombre, descripcion, correo, t
     conexion = obtener_conexion()
     password_encriptado = generate_password_hash(contrasenia, "sha256", 30)
     with conexion.cursor() as cursor:
-        cursor.execute("""INSERT INTO EMPRESA (DIRECCION_DIR_ID, TIPO_EMPRESA_T_EMP_ID, NOMBRE, DESCRIPCION, 
+        cursor.execute("""INSERT INTO EMPRESA (DIRECCION_DIR_ID, TIPO_EMPRESA_T_EMP_ID, NOMBRE, DESCRIPCION,
         CORREO, TELEFONO, USUARIO, CONTRASENA, NIT, ESTADO, DOCUMENTO)
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", 
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
         (id_direccion, id_tipo_empresa, nombre, descripcion, correo, telefono, usuario, password_encriptado, nit, "pendiente", nombre_archivo))
         empresa_id = cursor.lastrowid
     conexion.commit()
@@ -162,9 +162,9 @@ def AgregarEmpresa(id_direccion, id_tipo_empresa, nombre, descripcion, correo, t
 def AgregarSolicitud(id_empresa, id_repartidor, tipo_solicitud, fecha, descripcion, estado):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""INSERT INTO SOLICITUD 
+        cursor.execute("""INSERT INTO SOLICITUD
         (EMPRESA_EMP_ID, REPARTIDOR_REP_ID, TIPO_SOLICITUD, FECHA, DESCRIPCION, ESTADO)
-        VALUES(%s, %s, %s, %s, %s, %s)""", 
+        VALUES(%s, %s, %s, %s, %s, %s)""",
         (id_empresa, id_repartidor, tipo_solicitud, fecha, descripcion, estado))
     conexion.commit()
     conexion.close()
@@ -176,12 +176,23 @@ def EliminarEmpresa(id):
         cursor.execute("DELETE FROM EMPRESA WHERE EMP_ID = %s", (id,))
     conexion.commit()
     conexion.close()
-    
+
+# Controlador para insertar un producto en la base de datos
+def AgregarProducto(id_empresa, id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO PRODUCTO
+        (EMPRESA_EMP_ID, TIPO_PRODUCTO_T_PRO_ID, NOMBRE, DESCRIPCION, PRECIO, STOCK, FOTOGRAFIA)
+        VALUES(%s, %s, %s, %s, %s, %s, %s)""",
+        (id_empresa, id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo))
+    conexion.commit()
+    conexion.close()
+
 # Controlador para verificar los datos del admin en la base de datos
 def VerificarSesAdmin(usuario, contrasenia):
     conexion = obtener_conexion()
     usuariosend = None
-    with conexion.cursor() as cursor:        
+    with conexion.cursor() as cursor:
         cursor.execute("SELECT * FROM ADMINISTRADOR WHERE USUARIO = %s and CONTRASENA = %s", (usuario,contrasenia,))
         usuariosend = cursor.fetchone()
     conexion.close()
@@ -189,9 +200,9 @@ def VerificarSesAdmin(usuario, contrasenia):
 
 # Controlador para verificar los datos de un proveedor en la base de datos
 def VerificarSesProveedor(usuario, contrasenia):
-    conexion = obtener_conexion()    
+    conexion = obtener_conexion()
     proveedor = None
-    with conexion.cursor() as cursor:        
+    with conexion.cursor() as cursor:
         cursor.execute("select * from (((REPARTIDOR inner JOIN DIRECCION ON REPARTIDOR.DIRECCION_DIR_ID = DIRECCION.DIR_ID)INNER JOIN MUNICIPIO ON MUNICIPIO.MUN_ID = DIRECCION.MUNICIPIO_MUN_ID) INNER JOIN DEPARTAMENTO ON DEPARTAMENTO.DEP_ID = MUNICIPIO.DEPARTAMENTO_DEP_ID) WHERE USUARIO = %s and CONTRASENA = %s", (usuario,contrasenia,))
         proveedor = cursor.fetchone()
     conexion.close()
@@ -207,7 +218,7 @@ def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit
         cursor.execute("SELECT @DIR_ID;")
         id_direccion = cursor.fetchone()[0]
     with conexion.cursor() as cursor:
-        cursor.execute('''INSERT INTO REPARTIDOR(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, ESTADO,DOCUMENTO,LICENCIA,TRANSPORTE) 
+        cursor.execute('''INSERT INTO REPARTIDOR(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, ESTADO,DOCUMENTO,LICENCIA,TRANSPORTE)
                           VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ contra+"','"+ nit+"','"+ "pendiente"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
     conexion.commit()
     conexion.close()
@@ -232,7 +243,7 @@ def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, i
         cursor.execute("SELECT @DIR_ID;")
         id_direccion = cursor.fetchone()[0]
     with conexion.cursor() as cursor:
-        cursor.execute('''INSERT INTO CLIENTE(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, TARJETA, ESTADO) 
+        cursor.execute('''INSERT INTO CLIENTE(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, TARJETA, ESTADO)
                           VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ contra+"','"+ nit+"','"+ tarjeta +"','"+"pendiente"+"')")
     conexion.commit()
     conexion.close()
