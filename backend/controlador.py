@@ -148,6 +148,21 @@ def ObtenerProductosEmpresa(id_empresa):
     conexion.close()
     return productos_empresa
 
+# Controlador para ver todos los productos segun la empresa y segun el tipo de producto
+def ObtenerProductosEmpresaTipoProducto(id_empresa, id_tipo_producto):
+    conexion = obtener_conexion()
+    productos_empresa = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT p.PRO_ID, p.NOMBRE AS NOMBRE_PRODUCTO, p.DESCRIPCION, p.PRECIO, p.STOCK,
+        p.FOTOGRAFIA, tp.T_PRO_ID, tp.NOMBRE AS NOMBRE_TIPO_PRODUCTO
+        FROM PRODUCTO p
+        INNER JOIN TIPO_PRODUCTO tp ON tp.T_PRO_ID = p.TIPO_PRODUCTO_T_PRO_ID
+        WHERE p.EMPRESA_EMP_ID = %s AND p.TIPO_PRODUCTO_T_PRO_ID = %s""", (id_empresa, id_tipo_producto, ))
+        productos_empresa = cursor.fetchall()
+        productos_empresa = [{"PRO_ID":producto[0], "NOMBRE_PRODUCTO":producto[1], "DESCRIPCION":producto[2], "PRECIO":producto[3], "STOCK":producto[4], "FOTOGRAFIA":producto[5], "T_PRO_ID":producto[6], "NOMBRE_TIPO_PRODUCTO":producto[7]}for producto in productos_empresa]
+    conexion.close()
+    return productos_empresa
+
 # Controlador para agregar una direccion a la base de datos
 def AgregarDireccion(id_municipio, lugar):
     conexion = obtener_conexion()
