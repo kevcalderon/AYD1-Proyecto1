@@ -114,11 +114,110 @@ def CrearEmpresa():
         controlador.EliminarEmpresa(id_empresa)
         return jsonify({'exito':False, "msg": "Error al crear su usuario: " + str(e)})
 
+#Endpoint para comprobar si la contrasenia y usuario admin son correctos
+@app.route('/inicioSesionAdmin/<USER>/<CONTRA>', methods=['GET'])
+def inicioSesionAdmin(USER, CONTRA):
+    try:
+        usuario=controlador.VerificarSesAdmin(USER, CONTRA)
+        if  usuario != None:
+            return jsonify({'exito':True, "respuesta":{'USUARIO': usuario[0]}})
+        else:
+            return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
+        
+    except Exception as e:        
+        return jsonify({'exito':False, "msg": "Error al intentar iniciar sesion: " + str(e)})
+
+#Endpoint para comprobar si la contrasenia y usuario admin son correctos
+@app.route('/inicioSesionRepartidor/<USER>/<CONTRA>', methods=['GET'])
+def inicioSesionProveedor(USER, CONTRA):
+    try:
+        proveedor=controlador.VerificarSesProveedor(USER, CONTRA)
+        if  proveedor != None:
+            return jsonify({'exito':True, "respuesta":proveedor})
+        else:
+            return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
+        
+    except Exception as e:        
+        return jsonify({'exito':False, "msg": "Error al intentar iniciar sesion: " + str(e)})
+
+
 def archivo_permitido(name):
     name = name.split('.')
     if(name[-1] in ALLOWED_EXTENSIONS):
         return True
     return False
+
+
+
+@app.route('/registrarRepartidor', methods=['POST'])
+def registrarRepartidor():
+    info = request.json
+    nombre = info['nombre']
+    apellido = info['apellido']
+    telefono = info['telefono']
+    correo = info['correo']
+    usuario = info['usuario']
+    contra = info['contra']
+    nit = info['nit']
+    lugar = info['lugar']
+    documento = info['documento']
+    licencia = info['licencia']
+    transporte = info['transporte']
+    id_muni = info['id_muni']
+    id_dep = info['id_dep']
+    existencia = controlador.ExistenciaUsuario(usuario, "REPARTIDOR")
+    if existencia:
+        return jsonify({
+        "status": "failed",
+        "message": "El usuario " + usuario + " ya existe, intente denuevo."
+        })
+    try:
+        controlador.RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, documento)
+        return jsonify({
+        "status": "success",
+        "message": "El repartidor ha sido registrado exitosamente"
+        })
+    except:
+        return jsonify({
+        "status": "failed",
+        "message": "Ocurrio un error inesperado, intentelo denuevo."
+        })
+
+
+
+@app.route('/registrarCliente', methods=['POST'])
+def registrarCliente():
+    info = request.json
+    nombre = info['nombre']
+    apellido = info['apellido']
+    telefono = info['telefono']
+    correo = info['correo']
+    usuario = info['usuario']
+    contra = info['contra']
+    nit = info['nit']
+    lugar = info['lugar']
+    id_muni = info['id_muni']
+    id_dep = info['id_dep']
+    tarjeta = info['tarjeta']
+
+    existencia = controlador.ExistenciaUsuario(usuario, "CLIENTE")
+    if existencia:
+        return jsonify({
+        "status": "failed",
+        "message": "El usuario " + usuario + " ya existe, intente denuevo."
+        })
+    try:
+        controlador.RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, tarjeta)
+        return jsonify({
+        "status": "success",
+        "message": "El cliente ha sido registrado exitosamente"
+        })
+    except:
+        return jsonify({
+        "status": "failed",
+        "message": "Ocurrio un error inesperado, intentelo denuevo."
+        })
+
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
