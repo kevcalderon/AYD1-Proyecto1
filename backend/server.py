@@ -52,6 +52,16 @@ def MostrarMunicipio():
     except Exception as e:
         return jsonify({'respuesta': "Error al obtener los municipios" + e})
 
+# Endpoint para mostrar todos los municipios registrados en la base de datos
+# segun el parametro 'id_departamento'
+@app.route('/mostrarMunicipios/<id_departamento>', methods=["GET"])
+def MostrarMunicipioID(id_departamento):
+    try:
+        municipios = controlador.ObtenerMunicipios(id_departamento)
+        return jsonify(municipios)
+    except Exception as e:
+        return jsonify({'respuesta': "Error al obtener los municipios" + e})
+
 # Endpoint para mostrar todos los tipos de empresas registrados en la base de datos
 @app.route('/mostrarTiposEmpresa', methods=["GET"])
 def MostrarTipoEmpresa():
