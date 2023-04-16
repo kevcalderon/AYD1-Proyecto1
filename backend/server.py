@@ -147,6 +147,78 @@ def archivo_permitido(name):
         return True
     return False
 
+
+
+@app.route('/registrarRepartidor', methods=['POST'])
+def registrarRepartidor():
+    info = request.json
+    nombre = info['nombre']
+    apellido = info['apellido']
+    telefono = info['telefono']
+    correo = info['correo']
+    usuario = info['usuario']
+    contra = info['contra']
+    nit = info['nit']
+    lugar = info['lugar']
+    documento = info['documento']
+    licencia = info['licencia']
+    transporte = info['transporte']
+    id_muni = info['id_muni']
+    id_dep = info['id_dep']
+    existencia = controlador.ExistenciaUsuario(usuario, "REPARTIDOR")
+    if existencia:
+        return jsonify({
+        "status": "failed",
+        "message": "El usuario " + usuario + " ya existe, intente denuevo."
+        })
+    try:
+        controlador.RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, documento)
+        return jsonify({
+        "status": "success",
+        "message": "El repartidor ha sido registrado exitosamente"
+        })
+    except:
+        return jsonify({
+        "status": "failed",
+        "message": "Ocurrio un error inesperado, intentelo denuevo."
+        })
+
+
+
+@app.route('/registrarCliente', methods=['POST'])
+def registrarCliente():
+    info = request.json
+    nombre = info['nombre']
+    apellido = info['apellido']
+    telefono = info['telefono']
+    correo = info['correo']
+    usuario = info['usuario']
+    contra = info['contra']
+    nit = info['nit']
+    lugar = info['lugar']
+    id_muni = info['id_muni']
+    id_dep = info['id_dep']
+    tarjeta = info['tarjeta']
+
+    existencia = controlador.ExistenciaUsuario(usuario, "CLIENTE")
+    if existencia:
+        return jsonify({
+        "status": "failed",
+        "message": "El usuario " + usuario + " ya existe, intente denuevo."
+        })
+    try:
+        controlador.RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, tarjeta)
+        return jsonify({
+        "status": "success",
+        "message": "El cliente ha sido registrado exitosamente"
+        })
+    except:
+        return jsonify({
+        "status": "failed",
+        "message": "Ocurrio un error inesperado, intentelo denuevo."
+        })
+
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 

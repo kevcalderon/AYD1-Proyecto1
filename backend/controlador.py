@@ -197,3 +197,43 @@ def VerificarSesProveedor(usuario, contrasenia):
     conexion.close()
     return {'REP_ID':proveedor[0],"DIRECCION_DIR_ID":proveedor[1],"NOMBRE":proveedor[2], "APELLIDO":proveedor[3],"CORREO":proveedor[4], "TELEFONO":proveedor[5], "USUARIO":proveedor[6], "CONTRASENA":proveedor[7], "NIT":proveedor[8],
         "ESTADO":proveedor[9],"DOCUMENTO":proveedor[10],"LICENCIA":proveedor[11], "TRANSPORTE":proveedor[12],"MUNICIPIO_MUN_ID": proveedor[14], "LUGAR":proveedor[15], "MUNICIPIO_NOMBRE":proveedor[18], "DEPARTAMENTO_ID": proveedor[19], "DEPARTAMENTO_NOMBRE":proveedor[20]}
+
+def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, documento):
+    conexion = obtener_conexion()
+    id_direccion = ""
+    with conexion.cursor() as cursor:
+        cursor.execute("CALL CrearDireccion("+str(id_muni)+",'"+lugar+"',@DIR_ID);")
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT @DIR_ID;")
+        id_direccion = cursor.fetchone()[0]
+    with conexion.cursor() as cursor:
+        cursor.execute('''INSERT INTO REPARTIDOR(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, ESTADO,DOCUMENTO,LICENCIA,TRANSPORTE) 
+                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ contra+"','"+ nit+"','"+ "pendiente"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
+    conexion.commit()
+    conexion.close()
+
+def ExistenciaUsuario(usuario, tabla):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM "+ tabla +" WHERE usuario = '"+ usuario+ "';")
+        valor = cursor.fetchone()[0]
+        if valor != 0:
+            return True
+        else:
+            return False
+
+
+def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, tarjeta):
+    conexion = obtener_conexion()
+    id_direccion = ""
+    with conexion.cursor() as cursor:
+        cursor.execute("CALL CrearDireccion("+str(id_muni)+",'"+lugar+"',@DIR_ID);")
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT @DIR_ID;")
+        id_direccion = cursor.fetchone()[0]
+    with conexion.cursor() as cursor:
+        cursor.execute('''INSERT INTO CLIENTE(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, TARJETA, ESTADO) 
+                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ contra+"','"+ nit+"','"+ tarjeta +"','"+"pendiente"+"')")
+    conexion.commit()
+    conexion.close()
+
