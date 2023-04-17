@@ -34,9 +34,11 @@ const Registro = () => {
   }
 
   const onSubmitForm = async (values) => {
-    console.log(values)
     const result = await postRepartidor(values);
-    console.log(result);
+
+    if (!result.ok) {
+      console.log("error");
+    }
   };
 
   return (

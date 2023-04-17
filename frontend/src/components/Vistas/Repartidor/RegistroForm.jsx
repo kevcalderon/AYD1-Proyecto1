@@ -2,13 +2,13 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
 import { Backdrop, Button, CircularProgress, IconButton } from "@mui/material";
-import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
 import FormInput from "../../form-input/FormInput";
 import validationSchema from "./RegistroSchema";
 import AutoCompleteForm from "../../autocomplete/Autocomplete";
 import { getDepartamentoPorMunicipio } from "../../../services/municipios";
 import { useQuery } from "react-query";
 import ShowError from "../../showError/ShowError";
+import { Form } from "react-bootstrap";
 
 const licencias = [
   {
@@ -87,28 +87,13 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
   }
 
   const onSubmit = async (values) => {
-    if (!documento) {
-      setDocumentError(true);
-      return;
-    }
-
     if (isSubmitSuccessful) {
       setDocumento(undefined);
       reset();
     }
 
-    const request = { ...values, documento: documento };
+    const request = { ...values };
     onSubmitForm(request);
-  };
-
-  const handleFileUpload = (event) => {
-    const fileList = event.target.files;
-    if (fileList) {
-      const file = fileList[0];
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-      setDocumento(reader);
-    }
   };
 
   return (
@@ -238,25 +223,10 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
                 classname="mb-2"
               />
               <span>
-                <small>Cargar Archivo:</small>
-                <IconButton
-                  color="primary"
-                  aria-label="Upload File"
-                  label="Cargar un archivo"
-                  component="label"
-                  size="large"
-                  onClick={handleFileUpload}
-                >
-                  <input
-                    accept=".pdf"
-                    id="file-upload-input"
-                    multiple
-                    onChange={handleFileUpload}
-                    type="file"
-                    style={{ display: "none" }}
-                  />
-                  <FileUploadRoundedIcon />
-                </IconButton>
+                <Form.Group controlId="formFile" className="mb-3">
+                  <Form.Label>Documento</Form.Label>
+                  <Form.Control type="file" {...register("documento")} />
+                </Form.Group>
                 {documentError && (
                   <small className="text-red-600">
                     El documento es un campo obligatorio
