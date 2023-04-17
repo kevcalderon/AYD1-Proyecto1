@@ -131,7 +131,7 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
                 errors={errors}
                 name="contra"
                 controlId="contraseña"
-                type="text"
+                type="password"
                 register={register}
               />
               <FormInput

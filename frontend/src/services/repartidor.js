@@ -21,4 +21,22 @@ export const postRepartidor = async (payload) => {
     body: formData,
   });
 
+  return response;
+};
+
+export const login = async (username, password) => {
+  const response = await fetch(
+    `${API_URL}/inicioSesionRepartidor/${username}/${password}`,
+    {
+      method: "GET",
+      headers: { "Content-type": "application/json; charset=UTF-8" },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("imposible iniciar sesion");
+  }
+
+  const data = await response.json();
+  return data;
 };
