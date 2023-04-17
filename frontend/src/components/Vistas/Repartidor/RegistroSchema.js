@@ -30,6 +30,7 @@ const validationSchema = z.object({
     id: z.number(),
     value: z.string(),
   }),
+  documento: z.any(),
 });
 
 export default validationSchema;
