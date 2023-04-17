@@ -4,7 +4,7 @@ const validationSchema = z.object({
   nombre: z.string().min(1, { message: "Campo Requerido" }),
   apellido: z.string().min(1, { message: "Campo Requerido" }),
   usuario: z.string().min(1, { message: "Campo Requerido" }),
-  contraseña: z.string().min(1, { message: "Campo Requerido" }),
+  contra: z.string().min(1, { message: "Campo Requerido" }),
   correo: z
     .string()
     .min(1, { message: "Campo Requerido" })
@@ -13,11 +13,23 @@ const validationSchema = z.object({
     .string()
     .min(8, { message: "El telefono debe contener al menos 8 digitos" }),
   nit: z.string().min(1, { message: "Campo Requerido" }),
-  Departamento: z.string().min(1, { message: "Campo Requerido" }),
-  Municipio: z.string().min(1, { message: "Campo Requerido" }),
-  Lugar: z.string().min(1, { message: "Campo Requerido" }),
-  Licencia: z.string().min(1, { message: "Campo Requerido" }),
-  Transporte: z.string().min(1, { message: "Campo Requerido" }),
+  departamento: z.object({
+    DEP_ID: z.number().min(1, { message: "algo" }),
+    NOMBRE: z.string().min(1, { message: "algo" }),
+  }),
+  municipio: z.object({
+    MUN_ID: z.number().min(1, { message: "algo" }),
+    NOMBRE_MUNICIPIO: z.string().min(1, { message: "algo" }),
+  }),
+  lugar: z.string().min(1, { message: "Campo Requerido" }),
+  licencia: z.object({
+    id: z.number(),
+    name: z.string(),
+  }),
+  transporte: z.object({
+    id: z.number(),
+    value: z.string(),
+  }),
 });
 
 export default validationSchema;
