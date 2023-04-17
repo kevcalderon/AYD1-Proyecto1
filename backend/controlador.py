@@ -249,6 +249,7 @@ def VerificarSesProveedor(usuario, contrasenia):
 
 def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, documento):
     conexion = obtener_conexion()
+    password_encriptado = generate_password_hash(contra, "sha256", 30)
     id_direccion = ""
     with conexion.cursor() as cursor:
         cursor.execute("CALL CrearDireccion("+str(id_muni)+",'"+lugar+"',@DIR_ID);")
@@ -257,7 +258,7 @@ def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit
         id_direccion = cursor.fetchone()[0]
     with conexion.cursor() as cursor:
         cursor.execute('''INSERT INTO REPARTIDOR(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, ESTADO,DOCUMENTO,LICENCIA,TRANSPORTE)
-                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ contra+"','"+ nit+"','"+ "pendiente"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
+                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ "pendiente"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
     conexion.commit()
     conexion.close()
 
@@ -274,6 +275,7 @@ def ExistenciaUsuario(usuario, tabla):
 
 def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, tarjeta):
     conexion = obtener_conexion()
+    password_encriptado = generate_password_hash(contra, "sha256", 30)
     id_direccion = ""
     with conexion.cursor() as cursor:
         cursor.execute("CALL CrearDireccion("+str(id_muni)+",'"+lugar+"',@DIR_ID);")
@@ -282,7 +284,7 @@ def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, i
         id_direccion = cursor.fetchone()[0]
     with conexion.cursor() as cursor:
         cursor.execute('''INSERT INTO CLIENTE(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, TARJETA, ESTADO)
-                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ contra+"','"+ nit+"','"+ tarjeta +"','"+"pendiente"+"')")
+                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ tarjeta +"','"+"activo"+"')")
     conexion.commit()
     conexion.close()
 
