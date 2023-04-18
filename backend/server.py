@@ -1,6 +1,6 @@
 from conexion import obtener_conexion
 import controlador
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -269,6 +269,7 @@ def EliminarProducto(id_producto):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al eliminar su producto: " + str(e)})
 
+# Endpoint para actualizar la informacion de un producto
 @app.route('/actualizarProducto/<id_producto>', methods=["PUT"])
 def ActualizarProducto(id_producto):
     try:
@@ -293,6 +294,15 @@ def ActualizarProducto(id_producto):
         return jsonify({"exito":True, "msg":"El producto ha sido actualizado correctamente."})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar el producto: " + str(e)})
+
+# Endpoint para descargar un archivo que este unicamente en la carpeta public
+@app.route('/descargarArchivo/<nombre_archivo>', methods=['GET'])
+def DescargarArchivo (nombre_archivo):
+    try:
+        path = "../public/" + nombre_archivo
+        return send_file(path, as_attachment=True)
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error, no se ha encontrado el archivo"})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
