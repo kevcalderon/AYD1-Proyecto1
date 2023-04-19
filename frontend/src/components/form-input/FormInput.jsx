@@ -12,7 +12,7 @@ const FormInput = ({
 }) => {
   return (
     <Form.Group className="w-100" controlId={controlId}>
-      <FloatingLabel controlId={controlId} label={placeholder} className="mb-3">
+      <FloatingLabel controlId={controlId} label={placeholder} className="mb-2">
         <Form.Control
           type={type}
           placeholder={placeholder}
@@ -20,6 +20,7 @@ const FormInput = ({
           defaultValue=""
           {...props}
           isInvalid={!!errors[name]}
+          size="sm"
         />
       </FloatingLabel>
       {!!errors[name] && (

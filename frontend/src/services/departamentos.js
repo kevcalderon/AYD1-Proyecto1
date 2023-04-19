@@ -5,15 +5,11 @@ export const getDepartamentos = async () => {
     const response = await fetch(`${API_URL}/mostrarDepartamentos`, {
       method: "GET",
       headers: { "Content-type": "application/json; charset=UTF-8" },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        return data;
-      })
-      .catch((error) => {
-        throw error;
-      });
+    });
+
+    const data = await response.json();
+
+    return data;
   } catch (error) {
     console.log(error);
     throw error;

@@ -83,7 +83,8 @@ function Login() {
             className="alert alert-dismissible alert-danger"
             style={{ margin: "3%" }}
           >
-            <strong>Error!</strong> Credenciales invalidas.
+            <strong>Error!</strong> Credenciales invalidas o el usuario no esta
+            activo.
           </div>
         )}
         <div>

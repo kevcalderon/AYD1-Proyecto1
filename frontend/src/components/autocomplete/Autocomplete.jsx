@@ -26,7 +26,6 @@ const AutoCompleteForm = ({
           <Autocomplete
             {...rest}
             className={classname}
-            size="small"
             options={options}
             getOptionLabel={(option) => getOptionLabel(option)}
             isOptionEqualToValue={(option, value) =>
