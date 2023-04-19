@@ -283,6 +283,23 @@ def CrearCombo():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al crear su combo: " + str(e)})
 
+# Endpoint para almacenar un producto a un combo y asi ir formando el detalle del combo
+@app.route('/agregarProductoACombo', methods=['POST'])
+def AgregarProductoACombo():
+    try:
+        id_combo = request.form['id_combo']
+        id_producto = request.form['id_producto']
+        cantidad = request.form['cantidad']
+        observaciones = request.form['observaciones']
+        ids_productos = controlador.ObtenerProductoCombo(id_combo)
+        if (int(id_producto), ) in ids_productos :
+            return jsonify({"exito":False, "msg":"Este producto ya esta en el detalle del combo"})
+        else:
+            controlador.AgregarProductoACombo(id_combo, id_producto, cantidad, observaciones)
+            return jsonify({"exito":True, "msg":"Se ha agregado el producto al combo correctamente."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al agregar el producto al combo: " + str(e)})
+
 # Endpoint para eliminar un producto en la base de datos
 @app.route('/eliminarProducto/<id_producto>', methods=["DELETE"])
 def EliminarProducto(id_producto):
