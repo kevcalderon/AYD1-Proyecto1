@@ -231,8 +231,8 @@ def registrarRepartidor():
         id_empresa = controlador.UltimaEmpresa()
         controlador.AgregarSolicitud(id_empresa, id_repartidor, "repartidor", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo repartidor", "pendiente")
         return jsonify({
-        "status": "failed",
-        "message": "Error: La extension del archivo no es valida, intentelo denuevo."
+        "status": "success",
+        "message": "Se ha registrado su usuario correctamente, espere a que sea aprobado por un administrador."
         })
     except:
         return jsonify({
