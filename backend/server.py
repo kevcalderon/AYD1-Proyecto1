@@ -195,7 +195,7 @@ def CrearProducto():
 
 @app.route('/registrarRepartidor', methods=['POST'])
 def registrarRepartidor():
-    info = request.json
+    info = request.form
     nombre = info['nombre']
     apellido = info['apellido']
     telefono = info['telefono']
@@ -204,7 +204,6 @@ def registrarRepartidor():
     contra = info['contra']
     nit = info['nit']
     lugar = info['lugar']
-    documento = info['documento']
     licencia = info['licencia']
     transporte = info['transporte']
     id_muni = info['id_muni']
@@ -216,10 +215,24 @@ def registrarRepartidor():
         "message": "El usuario " + usuario + " ya existe, intente denuevo."
         })
     try:
-        controlador.RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, documento)
+        nombre_archivo = None
+        if('documento' in request.files):
+            documento = request.files['documento']
+            filename = secure_filename(documento.filename)
+            if(not archivo_permitido(filename)):
+                return jsonify({
+                    "status": "failed",
+                    "message":"La extensión del archivo no esta permitido"
+                    })
+            hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+            nombre_archivo = hora_actual + '_' + filename 
+            documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
+        id_repartidor = controlador.RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, nombre_archivo)
+        id_empresa = controlador.UltimaEmpresa()
+        controlador.AgregarSolicitud(id_empresa, id_repartidor, "repartidor", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo repartidor", "pendiente")
         return jsonify({
-        "status": "success",
-        "message": "El repartidor ha sido registrado exitosamente"
+        "status": "failed",
+        "message": "Error: La extension del archivo no es valida, intentelo denuevo."
         })
     except:
         return jsonify({
