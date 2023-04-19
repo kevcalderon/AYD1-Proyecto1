@@ -227,6 +227,20 @@ def ObtenerProductoCombo(id_combo):
     conexion.close()
     return ids_producto
 
+# Controlador el cual obtiene toda la informacion que posee un combo
+def ObtenerCombo(id_combo):
+    conexion = obtener_conexion()
+    combos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT NOMBRE, DESCRIPCION, PRECIO, FOTOGRAFIA FROM COMBO c WHERE COM_ID = %s""", (id_combo, ))
+        combos = cursor.fetchall()
+        if combos:
+            combos = [{"NOMBRE":combo[0], "DESCRIPCION":combo[1], "PRECIO":combo[2], "FOTOGRAFIA":combo[3]}for combo in combos]
+        else:
+            combos = None            
+    conexion.close()
+    return combos
+
 # Controlador para eliminar una empresa en la base de datos
 def EliminarEmpresa(id):
     conexion = obtener_conexion()
@@ -240,6 +254,22 @@ def EliminarProducto(id):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("DELETE FROM PRODUCTO WHERE PRO_ID = %s", (id,))
+    conexion.commit()
+    conexion.close()
+
+# Controlador para eliminar un combo segun su id
+def EliminarCombo(id_combo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("DELETE FROM COMBO WHERE COM_ID = %s", (id_combo,))
+    conexion.commit()
+    conexion.close()
+
+# Controlador para eliminar el detalle de un combo segun el id del combo
+def EliminarDetalleCombo(id_combo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("DELETE FROM DETALLE_COMBO WHERE COMBO_COM_ID = %s", (id_combo,))
     conexion.commit()
     conexion.close()
 
