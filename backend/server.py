@@ -260,6 +260,29 @@ def registrarCliente():
         "message": "Ocurrio un error inesperado, intentelo denuevo."
         })
 
+# Endpoint para almacenar un combo en la base de datos
+@app.route('/crearCombo', methods=['POST'])
+def CrearCombo():
+    try:
+        nombre = request.form['nombre']
+        descripcion = request.form['descripcion']
+        precio = request.form['precio']
+        nombre_archivo = None
+        if('documento' in request.files):
+            documento = request.files['documento']
+            filename = secure_filename(documento.filename)
+            if(not archivo_permitido(filename)):
+                return jsonify({"exito":False, "msg":"La extensión del archivo no esta permitido"})
+
+            hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") # Obtiene la hora actual como una cadena en el formato "YYYY-MM-DD-HH-MM-SS"
+            nombre_archivo = hora_actual + '_' + filename # Concatena la hora actual y el nombre de archivo original
+            documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
+
+        controlador.CrearCombo(nombre, descripcion, precio, nombre_archivo)
+        return jsonify({"exito":True, "msg":"Se ha creado su combo correctamente."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al crear su combo: " + str(e)})
+
 # Endpoint para eliminar un producto en la base de datos
 @app.route('/eliminarProducto/<id_producto>', methods=["DELETE"])
 def EliminarProducto(id_producto):
