@@ -208,6 +208,25 @@ def CrearCombo(nombre, descripcion, precio, nombre_archivo):
     conexion.commit()
     conexion.close()
 
+# Controlador para insertar un combo en la base de datos
+def AgregarProductoACombo(id_combo, id_producto, cantidad, observaciones):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO DETALLE_COMBO (COMBO_COM_ID, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES)
+        VALUES(%s, %s, %s, %s)""", (id_combo, id_producto, cantidad, observaciones))
+    conexion.commit()
+    conexion.close()
+
+# Controlador que se encarga de obtener los id de los productos que estan enlazados a un combo
+def ObtenerProductoCombo(id_combo):
+    conexion = obtener_conexion()
+    ids_producto = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT PRODUCTO_PRO_ID FROM DETALLE_COMBO dc WHERE COMBO_COM_ID = %s""", (id_combo, ))
+        ids_producto = cursor.fetchall()
+    conexion.close()
+    return ids_producto
+
 # Controlador para eliminar una empresa en la base de datos
 def EliminarEmpresa(id):
     conexion = obtener_conexion()
