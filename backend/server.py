@@ -309,6 +309,19 @@ def EliminarProducto(id_producto):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al eliminar su producto: " + str(e)})
 
+# Endpoint para eliminar un producto en la base de datos
+@app.route('/eliminarCombo/<id_combo>', methods=["DELETE"])
+def EliminarCombo(id_combo):
+    try:
+        info_combo = controlador.ObtenerCombo(id_combo)
+        if info_combo is not None:
+            controlador.EliminarDetalleCombo(id_combo)
+            controlador.EliminarCombo(id_combo)
+            os.remove(app.config['UPLOAD_FOLDER'] + "/"+ info_combo[0]['FOTOGRAFIA'])
+        return jsonify({"exito":True, "msg":"Se ha eliminado correctamente su combo."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al eliminar su combo: " + str(e)})
+
 # Endpoint para actualizar la informacion de un producto
 @app.route('/actualizarProducto/<id_producto>', methods=["PUT"])
 def ActualizarProducto(id_producto):
