@@ -309,6 +309,7 @@ def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit
     conexion = obtener_conexion()
     password_encriptado = generate_password_hash(contra, "sha256", 30)
     id_direccion = ""
+    id_repartidor = None 
     with conexion.cursor() as cursor:
         cursor.execute("CALL CrearDireccion("+str(id_muni)+",'"+lugar+"',@DIR_ID);")
     with conexion.cursor() as cursor:
@@ -317,8 +318,11 @@ def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit
     with conexion.cursor() as cursor:
         cursor.execute('''INSERT INTO REPARTIDOR(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, ESTADO,DOCUMENTO,LICENCIA,TRANSPORTE)
                           VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ "pendiente"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
+        cursor.execute("SELECT LAST_INSERT_ID();")
+        id_repartidor = cursor.fetchone()[0]
     conexion.commit()
     conexion.close()
+    return id_repartidor
 
 def ExistenciaUsuario(usuario, tabla):
     conexion = obtener_conexion()
@@ -327,8 +331,7 @@ def ExistenciaUsuario(usuario, tabla):
         valor = cursor.fetchone()[0]
         if valor != 0:
             return True
-        else:
-            return False
+        return False
 
 
 def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, tarjeta):
@@ -356,3 +359,12 @@ def ActualizarProducto(id_producto, id_tipo_producto, nombre, descripcion, preci
         (id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo, id_producto))
     conexion.commit()
     conexion.close()
+
+
+def UltimaEmpresa():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT MAX(EMP_ID) FROM EMPRESA")
+        id = cursor.fetchone()[0]
+    conexion.close()
+    return id
