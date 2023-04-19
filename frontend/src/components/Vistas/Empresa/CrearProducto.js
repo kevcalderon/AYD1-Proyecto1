@@ -30,6 +30,7 @@ function CrearProducto() {
   } = methods;
 
   const onSubmit = async (values) => {
+    console.log(values);
     const empresa = JSON.parse(localStorage.getItem("empresa"));
     const formData = new FormData();
     formData.append("id_empresa", empresa.EMP_ID);
@@ -125,7 +126,7 @@ function CrearProducto() {
                 <option value="8">SNACKS</option>
                 <option value="9">ELECTRONICOS</option>
                 <option value="10">ARTICULOS DEPORTIVOS</option>
-                <option value="111">VESTUARIO</option>
+                <option value="11">VESTUARIO</option>
               </Form.Select>
               <br></br>
               <Form.Group controlId="formFile" className="mb-3">
