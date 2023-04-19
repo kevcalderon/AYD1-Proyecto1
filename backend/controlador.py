@@ -199,6 +199,15 @@ def AgregarSolicitud(id_empresa, id_repartidor, tipo_solicitud, fecha, descripci
     conexion.commit()
     conexion.close()
 
+# Controlador para insertar un combo en la base de datos
+def CrearCombo(nombre, descripcion, precio, nombre_archivo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO COMBO (NOMBRE, DESCRIPCION, PRECIO, FOTOGRAFIA)
+        VALUES(%s, %s, %s, %s)""", (nombre, descripcion, precio, nombre_archivo))
+    conexion.commit()
+    conexion.close()
+
 # Controlador para eliminar una empresa en la base de datos
 def EliminarEmpresa(id):
     conexion = obtener_conexion()
