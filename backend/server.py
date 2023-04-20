@@ -158,11 +158,11 @@ def inicioSesionAdmin(USER, CONTRA):
 
 #Endpoint para comprobar si la contrasenia y usuario admin son correctos
 @app.route('/inicioSesionRepartidor/<USER>/<CONTRA>', methods=['GET'])
-def inicioSesionProveedor(USER, CONTRA):
+def inicioSesionRepartidor(USER, CONTRA):
     try:
-        proveedor=controlador.VerificarSesProveedor(USER, CONTRA)
-        if  proveedor != None:
-            return jsonify({'exito':True, "respuesta":proveedor})
+        usuario=controlador.VerificarSesRepartidor(USER, CONTRA)
+        if  usuario != None:
+            return jsonify({'exito':True, "respuesta":{'USUARIO': usuario[0]}})
         else:
             return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
 

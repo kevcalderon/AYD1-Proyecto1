@@ -348,17 +348,17 @@ def VerificarSesAdmin(usuario, contrasenia):
     conexion.close()
     return usuariosend
 
-# Controlador para verificar los datos de un proveedor en la base de datos
-def VerificarSesProveedor(usuario, contrasenia):
+
+def VerificarSesRepartidor(usuario, contraseña):
     conexion = obtener_conexion()
-    proveedor = None
-    password_encriptado = generate_password_hash(contrasenia, "sha256", 30)
+    usuariosend = None
     with conexion.cursor() as cursor:
-        cursor.execute("select * from (((REPARTIDOR inner JOIN DIRECCION ON REPARTIDOR.DIRECCION_DIR_ID = DIRECCION.DIR_ID)INNER JOIN MUNICIPIO ON MUNICIPIO.MUN_ID = DIRECCION.MUNICIPIO_MUN_ID) INNER JOIN DEPARTAMENTO ON DEPARTAMENTO.DEP_ID = MUNICIPIO.DEPARTAMENTO_DEP_ID) WHERE USUARIO = %s and CONTRASENA = %s", (usuario,password_encriptado,))
-        proveedor = cursor.fetchone()
+        cursor.execute("SELECT * FROM REPARTIDOR WHERE USUARIO = %s and CONTRASENA = %s", (usuario,contraseña,))
+        usuariosend = cursor.fetchone()
     conexion.close()
-    return {'REP_ID':proveedor[0],"DIRECCION_DIR_ID":proveedor[1],"NOMBRE":proveedor[2], "APELLIDO":proveedor[3],"CORREO":proveedor[4], "TELEFONO":proveedor[5], "USUARIO":proveedor[6], "CONTRASENA":proveedor[7], "NIT":proveedor[8],
-        "ESTADO":proveedor[9],"DOCUMENTO":proveedor[10],"LICENCIA":proveedor[11], "TRANSPORTE":proveedor[12],"MUNICIPIO_MUN_ID": proveedor[14], "LUGAR":proveedor[15], "MUNICIPIO_NOMBRE":proveedor[18], "DEPARTAMENTO_ID": proveedor[19], "DEPARTAMENTO_NOMBRE":proveedor[20]}
+    return usuariosend
+
+
 
 def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, documento):
     conexion = obtener_conexion()
