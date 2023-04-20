@@ -91,6 +91,15 @@ def MostrarProductosEmpresaTipoProducto(id_empresa, id_tipo_producto):
     except Exception as e:
         return jsonify({'respuesta': "Error al obtener los productos de la empresa: " + str(e)})
 
+#Endpoint para mostrar todas las ordenes existentes con su respectivo detalle
+@app.route('/mostrarOrdenes/<id_empresa>', methods=['GET'])
+def MostrarOrdenes(id_empresa):
+    try:
+        respuesta = controlador.MostrarOrdenes(id_empresa)
+        return jsonify({"exito":True, "msg":respuesta})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostrar la informacion: " + str(e)})
+
 # Endpoint para almacenar una empresa en la base de datos
 @app.route('/crearEmpresa', methods=['POST'])
 def CrearEmpresa():
