@@ -567,7 +567,7 @@ def ModificarDetalleOrdenProducto(id_orden, id_producto, cantidad, observaciones
 def VerPedidosPendientesRepartidor():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT ORD_ID, C.NOMBRE, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO  FROM ORDEN O
+        cursor.execute("""SELECT ORD_ID, C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO  FROM ORDEN O
         INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
         INNER JOIN DIRECCION D on O.DIRECCION_DIR_ID = D.DIR_ID
         INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
@@ -579,8 +579,55 @@ def VerPedidosPendientesRepartidor():
         pendientes = cursor.fetchall()
         lista_pedidos = []
         for pedido in pendientes:
-            new_pendiente = {"ORD_ID":pedido[0], "CLIENTE":pedido[1], "DEPARTAMENTO":pedido[2], "MUNICIPIO":pedido[3], "LUGAR":pedido[4], "METODO_PAGO":pedido[5], "ESTADO":pedido[6]}
+            new_pendiente = {"ORD_ID":pedido[0], "CLIENTE":pedido[1]+" "+pedido[2], "DEPARTAMENTO":pedido[3], "MUNICIPIO":pedido[4], "LUGAR":pedido[5], "METODO_PAGO":pedido[6], "ESTADO":pedido[7]}
             lista_pedidos.append(new_pendiente)
         conexion.close()
         return lista_pedidos
 
+#Controlador que retorna el id del usuario de tipo repartidor logeado.
+def VerIdRepartidorLog(nombre):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT REP_ID FROM REPARTIDOR WHERE USUARIO ="+str(nombre))
+        id_rep = cursor.fetchone()[0]
+        conexion.close()
+        return id_rep
+
+#Controlador que retorna el id de la orden asignada al repartidor
+def VerIdOrdenAsignadaRepartidor(rep_id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE ESTADO = 'EN PROCESO' AND REPARTIDOR_REP_ID =" + str(rep_id))
+        id_ord = cursor.fetchone()[0]
+        conexion.close()
+        return id_ord 
+
+#Controlador para retornar la orden asignada al repartidor
+def VerPedidoAsignadoRepartidor(nombre):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        id_usuario = VerIdRepartidorLog(nombre)
+        id_ord = VerIdOrdenAsignadaRepartidor(id_usuario)
+        cursor.execute("""SELECT C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO FROM ORDEN O
+        INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
+        INNER JOIN DIRECCION D on O.DIRECCION_DIR_ID = D.DIR_ID
+        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
+        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
+        WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID = %s""", (id_ord,))
+        pedido = cursor.fetchone()[0]
+        cursor.execute("""SELECT C.NOMBRE, P.NOMBRE, D.CANTIDAD  FROM DETALLE_ORDEN D
+        INNER JOIN COMBO C on D.COMBO_COM_ID = C.COM_ID
+        INNER JOIN PRODUCTO P on D.PRODUCTO_PRO_ID = P.PRO_ID
+        WHERE D.ORDEN_ORD_ID = %s""",(id_ord,))
+        lista_p = []
+        new_prod = None
+        lista_productos = cursor.fetchall()
+        for producto in lista_productos:
+            if producto[0] != None:
+                new_prod = {"PROMOCION":producto[0], "CANTIDAD":producto[2]}
+                lista_p.append(new_prod)
+            elif producto[1] != None:
+                new_prod = {"PRODUCTO":producto[1], "CANTIDAD":producto[2]}
+                lista_p.append(new_prod)
+        asignado = {"CLIENTE":pedido[0]+" "+pedido[1], "DEPARTAMENTO":pedido[2], "MUNICIPIO":pedido[3], "LUGAR":pedido[4], "METODO_PAGO":pedido[5], "ESTADO":pedido[6], "PRODUCTOS":lista_p}
+        return asignado
