@@ -461,7 +461,7 @@ def ObtenerlistaCombosEmpresa(id_empresa):
 def EliminarProductoCarrito(id_producto, id_cliente):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         IDCOMBO = cursor.fetchone()
         
         cursor.execute("DELETE FROM DETALLE_ORDEN WHERE PRODUCTO_PRO_ID = %s AND PRODUCTO_PRO_ID = %s;", (id_producto, IDCOMBO))
@@ -474,7 +474,7 @@ def EliminarProductoCarrito(id_producto, id_cliente):
 def EliminarComboCarrito(id_combo, id_cliente):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         IDCOMBO = cursor.fetchone()
         
         cursor.execute("DELETE FROM DETALLE_ORDEN WHERE PRODUCTO_PRO_ID = %s AND COMBO_COM_ID = %s;", (id_combo, IDCOMBO))
@@ -487,7 +487,7 @@ def EliminarComboCarrito(id_combo, id_cliente):
 def ConfirmarOrdenCarrito(id_cliente):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         IDORDEN = cursor.fetchone()
         
         cursor.execute("UPDATE ORDEN SET ESTADO = 'PENDIENTE' WHERE ORD_ID = %s;", (IDORDEN))
@@ -501,7 +501,7 @@ def AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("INSERT INTO DETALLE_ORDEN (COMBO_COM_ID, ORDEN_ORD_ID, CANTIDAD, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES,ESTADO)" + 
-                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(cantidad) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + estado + "');")
+                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(cantidad) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + "PENDIENTE" + "');")
     conexion.commit()
     conexion.close()
 
@@ -510,12 +510,12 @@ def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calif
     conexion = obtener_conexion()
     id_orden = None
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         id_orden = cursor.fetchone()[0]
     if id_orden is None:
         with conexion.cursor() as cursor:
             cursor.execute("INSERT INTO ORDEN (CLIENTE_CLI_ID, DIRECCION_DIR_ID, REPARTIDOR_REP_ID, FECHA, ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO)" + 
-                       "VALUES (" + str(id_cliente) + "," + str(id_direccion) + "," + str(id_repartidor) + ",'" + fecha + "','" + "" + "'," + str(calificacion) + ",'" + comentario + "','" + metodo_pago + "');")
+                       "VALUES (" + str(id_cliente) + "," + str(id_direccion) + "," + str(id_repartidor) + ",'" + fecha + "','" + "PENDIENTE" + "'," + str(calificacion) + ",'" + comentario + "','" + metodo_pago + "');")
         cursor.execute("SELECT LAST_INSERT_ID();")
         id_orden = cursor.fetchone()[0]
     conexion.commit()
@@ -527,7 +527,7 @@ def MostrarCarrito(id_cliente):
     id_orden = None
     contenido = None
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         id_orden = cursor.fetchone()[0]
     if id_orden is None:
         cursor.execute("select PRO_ID, EMPRESA_EMP_ID, NOMBRE, DESCRIPCION, PRECIO, STOCK, FOTOGRAFIA from ((ORDEN inner JOIN DETALLE_ORDEN ON DETALLE_ORDEN.COMBO_COM_ID = ORDEN.ORD_ID) INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_ORDEN.PRODUCTO_PRO_ID) where ORD_ID = %s;", (id_orden,))
@@ -540,7 +540,7 @@ def MostrarCarritoCombos(id_cliente):
     id_orden = None
     contenido = None
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         id_orden = cursor.fetchone()[0]
     if id_orden is None:
         cursor.execute("select COM_ID, NOMBRE, DESCRIPCION, PRECIO, FOTOGRAFIA from ((ORDEN inner JOIN DETALLE_ORDEN ON DETALLE_ORDEN.COMBO_COM_ID = ORDEN.ORD_ID) INNER JOIN COMBO ON COMBO.COM_ID = DETALLE_ORDEN.ORDEN_ORD_ID) where ORD_ID = %s;", (id_orden,))
@@ -564,7 +564,7 @@ def MostrarProductosDeUnCombo(id_combo):
 def ModificarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         id_orden = cursor.fetchone()[0]
         cursor.execute("UPDATE ORDEN SET CLIENTE_CLI_ID = " + str(id_cliente) + ", DIRECCION_DIR_ID = " + str(id_direccion) + ", REPARTIDOR_REP_ID = " + str(id_repartidor) + ", FECHA = '" + fecha + "', CALIFICACION = " + str(calificacion) + ", COMENTARIO = '" + comentario + "', METODO_PAGO = '" + metodo_pago + "' WHERE ORD_ID = " + str(id_orden) + ";")
     conexion.commit()
@@ -574,7 +574,7 @@ def ModificarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, cal
 def ModificarComboCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
         id_orden = cursor.fetchone()[0]
         cursor.execute("UPDATE ORDEN SET CLIENTE_CLI_ID = " + str(id_cliente) + ", DIRECCION_DIR_ID = " + str(id_direccion) + ", REPARTIDOR_REP_ID = " + str(id_repartidor) + ", FECHA = '" + fecha + "', CALIFICACION = " + str(calificacion) + ", COMENTARIO = '" + comentario + "', METODO_PAGO = '" + metodo_pago + "' WHERE ORD_ID = " + str(id_orden) + ";")
     conexion.commit()
