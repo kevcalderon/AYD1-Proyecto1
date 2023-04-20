@@ -298,8 +298,9 @@ def VerificarSesAdmin(usuario, contrasenia):
 def VerificarSesProveedor(usuario, contrasenia):
     conexion = obtener_conexion()
     proveedor = None
+    password_encriptado = generate_password_hash(contrasenia, "sha256", 30)
     with conexion.cursor() as cursor:
-        cursor.execute("select * from (((REPARTIDOR inner JOIN DIRECCION ON REPARTIDOR.DIRECCION_DIR_ID = DIRECCION.DIR_ID)INNER JOIN MUNICIPIO ON MUNICIPIO.MUN_ID = DIRECCION.MUNICIPIO_MUN_ID) INNER JOIN DEPARTAMENTO ON DEPARTAMENTO.DEP_ID = MUNICIPIO.DEPARTAMENTO_DEP_ID) WHERE USUARIO = %s and CONTRASENA = %s", (usuario,contrasenia,))
+        cursor.execute("select * from (((REPARTIDOR inner JOIN DIRECCION ON REPARTIDOR.DIRECCION_DIR_ID = DIRECCION.DIR_ID)INNER JOIN MUNICIPIO ON MUNICIPIO.MUN_ID = DIRECCION.MUNICIPIO_MUN_ID) INNER JOIN DEPARTAMENTO ON DEPARTAMENTO.DEP_ID = MUNICIPIO.DEPARTAMENTO_DEP_ID) WHERE USUARIO = %s and CONTRASENA = %s", (usuario,password_encriptado,))
         proveedor = cursor.fetchone()
     conexion.close()
     return {'REP_ID':proveedor[0],"DIRECCION_DIR_ID":proveedor[1],"NOMBRE":proveedor[2], "APELLIDO":proveedor[3],"CORREO":proveedor[4], "TELEFONO":proveedor[5], "USUARIO":proveedor[6], "CONTRASENA":proveedor[7], "NIT":proveedor[8],
@@ -401,3 +402,29 @@ def ObtenerlistaCombosEmpresa(id_empresa):
             listacombos.append(newcombo)
     conexion.close()
     return listacombos
+
+# Controlador para eliminar producto del carrito
+def EliminarProductoCarrito(id_producto, id_cliente):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        IDCOMBO = cursor.fetchone()
+        
+        cursor.execute("DELETE FROM DETALLE_ORDEN WHERE PRODUCTO_PRO_ID = %s AND PRODUCTO_PRO_ID = %s;", (id_producto, IDCOMBO))
+        
+    conexion.commit()
+    conexion.close()
+    return True
+
+# Controlador para eliminar producto del carrito
+def EliminarComboCarrito(id_combo, id_cliente):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        IDCOMBO = cursor.fetchone()
+        
+        cursor.execute("DELETE FROM DETALLE_ORDEN WHERE PRODUCTO_PRO_ID = %s AND COMBO_COM_ID = %s;", (id_combo, IDCOMBO))
+        
+    conexion.commit()
+    conexion.close()
+    return True

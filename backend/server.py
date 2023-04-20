@@ -388,6 +388,28 @@ def ObtenerCombosEmpresa(id_empresa):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al obtener los combos: " + str(e)})
 
+#Endpoint para eliminar productos de una orden
+@app.route('/eliminarProductoOrden/<id_producto>/<id_cliente>', methods=['DELETE'])
+def EliminarProductoOrden(id_producto, id_cliente):
+    try:
+        if controlador.EliminarProductoCarrito(id_producto, id_cliente):
+            return jsonify({"exito":True, "msg":"Se ha eliminado el producto de la orden correctamente."})
+        else :
+            return jsonify({'exito':False, "msg": "Error al eliminar el producto de la orden" })
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al eliminar el producto de la orden: " + str(e)})
+
+#Endpoint para eliminar combo de una orden
+@app.route('/eliminarComboOrden/<id_combo>/<id_cliente>', methods=['DELETE'])
+def EliminarProductoOrden(id_combo, id_cliente):
+    try:
+        if controlador.EliminarComboCarrito(id_combo, id_cliente):
+            return jsonify({"exito":True, "msg":"Se ha eliminado el combo de la orden correctamente."})
+        else :
+            return jsonify({'exito':False, "msg": "Error al eliminar el combo de la orden" })
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al eliminar el combo de la orden: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
