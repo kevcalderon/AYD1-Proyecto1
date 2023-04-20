@@ -470,6 +470,29 @@ def MostrarCarritoCliente(id_combo):
         return jsonify({'exito':False, "msg": "Error al mostrar el carrito: " + str(e)})
 
 
+@app.route('/ModificarProductoCarrito', methods=['PUT'])
+def ModificarProductoCarrito():
+    try:
+        id_cliente = request.form['id_cliente']
+        id_direccion = request.form['id_direccion']
+        id_repartidor = request.form['id_repartidor']
+        fecha = request.form['fecha']
+        calificacion = request.form['calificacion']
+        comentario = request.form['comentario']
+        metodo_pago = request.form['metodo_pago']
+        id_combo = request.form['id_combo']
+        cantidad = request.form['cantidad']
+        id_producto = request.form['id_producto']
+        observaciones = request.form['observaciones']
+        estado = request.form['estado']
+        id_orden = controlador.ModificarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago)
+        controlador.ModificarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones, estado)
+        return jsonify({"exito":True, "msg":"Se ha modificado el producto del carrito correctamente."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al modificar el producto del carrito: " + str(e)})
+
+
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
