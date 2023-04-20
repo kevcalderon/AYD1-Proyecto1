@@ -467,3 +467,41 @@ def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calif
     conexion.commit()
     conexion.close()
     return id_orden
+
+def MostrarCarrito(id_cliente):
+    conexion = obtener_conexion()
+    id_orden = None
+    contenido = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+    if id_orden is None:
+        cursor.execute("select PRO_ID, EMPRESA_EMP_ID, NOMBRE, DESCRIPCION, PRECIO, STOCK, FOTOGRAFIA from ((ORDEN inner JOIN DETALLE_ORDEN ON DETALLE_ORDEN.COMBO_COM_ID = ORDEN.ORD_ID) INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_ORDEN.PRODUCTO_PRO_ID) where ORD_ID = %s;", (id_orden,))
+        contenidofetch = cursor.fetchall()
+        contenido = {"PRO_ID": contenidofetch[0], "EMPRESA_EMP_ID": contenidofetch[1], "NOMBRE": contenidofetch[2], "DESCRIPCION": contenidofetch[3], "PRECIO": contenidofetch[4], "STOCK": contenidofetch[5], "FOTOGRAFIA": contenidofetch[6]}
+    return contenido
+
+def MostrarCarritoCombos(id_cliente):
+    conexion = obtener_conexion()
+    id_orden = None
+    contenido = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+    if id_orden is None:
+        cursor.execute("select COM_ID, NOMBRE, DESCRIPCION, PRECIO, FOTOGRAFIA from ((ORDEN inner JOIN DETALLE_ORDEN ON DETALLE_ORDEN.COMBO_COM_ID = ORDEN.ORD_ID) INNER JOIN COMBO ON COMBO.COM_ID = DETALLE_ORDEN.ORDEN_ORD_ID) where ORD_ID = %s;", (id_orden,))
+        contenidofetch = cursor.fetchall()
+        contenido = [{"COM_ID":combo[0],"NOMBRE": combo[1],"DESCRIPCION": combo[2], "PRECIO": combo[3], "FOTOGRAFIA":combo[4]}for combo in contenidofetch]
+    return contenido
+        
+        
+def MostrarProductosDeUnCombo(id_combo):
+    conexion = obtener_conexion()    
+    with conexion.cursor() as cursor:
+        cursor.execute("select PRODUCTO_PRO_ID, EMPRESA_EMP_ID, TIPO_PRODUCTO_T_PRO_ID, PRODUCTO.NOMBRE, PRODUCTO.DESCRIPCION, PRODUCTO.PRECIO, STOCK, PRODUCTO.FOTOGRAFIA, CANTIDAD, OBSERVACIONES from ((DETALLE_COMBO inner join COMBO on DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID )INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID) where COMBO.COM_ID = %s;", (id_combo,))
+        productos = cursor.fetchall()
+        listaproductos = []
+        for producto in productos:
+            newproducto = {"PRODUCTO_PRO_ID": producto[0], "EMPRESA_EMP_ID": producto[1], "TIPO_PRODUCTO_T_PRO_ID": producto[2], "NOMBRE": producto[3], "DESCRIPCION": producto[4], "PRECIO": producto[5], "STOCK": producto[6], "FOTOGRAFIA": producto[7], "CANTIDAD": producto[8], "OBSERVACIONES": producto[9]}
+            listaproductos.append(newproducto)
+    return listaproductos  

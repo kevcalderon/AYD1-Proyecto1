@@ -401,7 +401,7 @@ def EliminarProductoOrden(id_producto, id_cliente):
 
 #Endpoint para eliminar combo de una orden
 @app.route('/eliminarComboOrden/<id_combo>/<id_cliente>', methods=['DELETE'])
-def EliminarProductoOrden(id_combo, id_cliente):
+def EliminarComboOrden(id_combo, id_cliente):
     try:
         if controlador.EliminarComboCarrito(id_combo, id_cliente):
             return jsonify({"exito":True, "msg":"Se ha eliminado el combo de la orden correctamente."})
@@ -441,6 +441,34 @@ def AgregarProductoCarrito():
         return jsonify({"exito":True, "msg":"Se ha agregado el producto al carrito correctamente."})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al agregar el producto al carrito: " + str(e)})
+
+#Endpoint para mostrar el carrito de un cliente
+@app.route('/mostrarCarritoProductos/<id_cliente>', methods=['GET'])
+def MostrarCarritoCliente(id_cliente):
+    try:
+        carrito = controlador.MostrarCarrito(id_cliente)
+        return jsonify({"exito":True, "carrito":carrito})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostrar el carrito: " + str(e)})
+
+#Endpoint para mostrar el carrito de un cliente
+@app.route('/mostrarCarritoCombos/<id_cliente>', methods=['GET'])
+def MostrarCarritoCliente(id_cliente):
+    try:
+        carrito = controlador.MostrarCarritoCombos(id_cliente)
+        return jsonify({"exito":True, "carrito":carrito})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostrar el carrito: " + str(e)})
+
+#Endpoint para mostrar el carrito de un cliente
+@app.route('/mostrarProductosCombo/<id_combo>', methods=['GET'])
+def MostrarCarritoCliente(id_combo):
+    try:
+        carrito = controlador.MostrarProductosDeUnCombo(id_combo)
+        return jsonify({"exito":True, "carrito":carrito})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostrar el carrito: " + str(e)})
+
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
