@@ -370,6 +370,15 @@ def DescargarArchivo (nombre_archivo):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error, no se ha encontrado el archivo"})
 
+# Endpoint para obtener una lista de empresas
+@app.route('/obtenerListaEmpresas', methods=['GET'])
+def ObtenerListaEmpresas():
+    try:
+        empresas = controlador.ObtenerEmpresas()
+        return jsonify({"exito":True, "empresas":empresas})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al obtener las empresas: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 

@@ -368,3 +368,15 @@ def UltimaEmpresa():
         id = cursor.fetchone()[0]
     conexion.close()
     return id
+
+# Controlador para ver obtener una lista de empresas
+def ObtenerEmpresas():
+    conexion = obtener_conexion()
+    empresaslist = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM EMPRESA")
+        empresaslist = cursor.fetchall()
+    conexion.close()
+    return [{"EMP_ID":empresas[0], "DIRECCION_DIR_ID":empresas[1], "TIPO_EMPRESA_T_EMP_ID":empresas[2],
+"NOMBRE":empresas[3], "DESCRIPCION":empresas[4], "CORREO":empresas[5], "TELEFONO":empresas[6], "USUARIO":empresas[7],
+"CONTRASENA":empresas[8], "ESTADO":empresas[9],"NIT":empresas[10], "DOCUMENTO":empresas[11]}for empresas in empresaslist]
