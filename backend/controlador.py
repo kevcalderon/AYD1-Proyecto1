@@ -1,5 +1,6 @@
 from conexion import obtener_conexion
 from werkzeug.security import check_password_hash, generate_password_hash
+import json
 
 # Controlador para buscar un cliente en la base de datos
 def LoguearCliente(nombre_usuario, contrasenia):
@@ -238,6 +239,26 @@ def ObtenerCombo(id_combo):
             combos = [{"NOMBRE":combo[0], "DESCRIPCION":combo[1], "PRECIO":combo[2], "FOTOGRAFIA":combo[3]}for combo in combos]
         else:
             combos = None            
+    conexion.close()
+    return combos
+
+# Controlador el cual obtiene toda la informacion que posee un combo como tambien su detalle
+def MostrarCombosConProductos(id_empresa):
+    conexion = obtener_conexion()
+    combos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT c.*, JSON_ARRAYAGG(JSON_OBJECT('id_producto', p.PRO_ID,'nombre', p.NOMBRE, 'cantidad', dc.CANTIDAD, 'observaciones', dc.OBSERVACIONES)) as detalle_combo
+        FROM DETALLE_COMBO dc 
+        INNER JOIN COMBO c ON c.COM_ID = dc.COMBO_COM_ID 
+        INNER JOIN PRODUCTO p ON p.PRO_ID = dc.PRODUCTO_PRO_ID 
+        WHERE p.EMPRESA_EMP_ID = %s
+        GROUP BY c.COM_ID""", (id_empresa, ))
+        combos = cursor.fetchall()
+        
+        if combos:
+            combos = [{"ID_COMBO":combo[0], "NOMBRE":combo[1], "DESCRIPCION":combo[2], "PRECIO":combo[3], "FOTOGRAFIA":combo[4], "DETALLE_COMBO":json.loads(combo[5])}for combo in combos]
+        else:
+            combos = None
     conexion.close()
     return combos
 

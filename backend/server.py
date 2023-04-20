@@ -5,6 +5,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
+import json
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -387,6 +388,15 @@ def ObtenerCombosEmpresa(id_empresa):
         return jsonify({"exito":True, "combos":combos})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al obtener los combos: " + str(e)})
+
+#Endpoint para mostrar todos los combos existentes con su respectivo detalle
+@app.route('/mostrarCombosConProductos/<id_empresa>', methods=['GET'])
+def MostrarCombosConProductos(id_empresa):
+    try:
+        respuesta = controlador.MostrarCombosConProductos(id_empresa)
+        return jsonify({"exito":True, "msg":respuesta})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostrar la informacion: " + str(e)})
 
 #Endpoint para eliminar productos de una orden
 @app.route('/eliminarProductoOrden/<id_producto>/<id_cliente>', methods=['DELETE'])
