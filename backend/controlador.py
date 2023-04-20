@@ -517,7 +517,25 @@ def ModificarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, cal
     conexion.close()
     return id_orden
 
-def ModificarDetalleOrden(id_orden, id_producto, cantidad, observaciones):
+def ModificarComboCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+        cursor.execute("UPDATE ORDEN SET CLIENTE_CLI_ID = " + str(id_cliente) + ", DIRECCION_DIR_ID = " + str(id_direccion) + ", REPARTIDOR_REP_ID = " + str(id_repartidor) + ", FECHA = '" + fecha + "', CALIFICACION = " + str(calificacion) + ", COMENTARIO = '" + comentario + "', METODO_PAGO = '" + metodo_pago + "' WHERE ORD_ID = " + str(id_orden) + ";")
+    conexion.commit()
+    conexion.close()
+    return id_orden
+
+
+def ModificarDetalleOrdenCombo(id_orden, id_combo, cantidad, observaciones):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("UPDATE DETALLE_ORDEN SET CANTIDAD = " + str(cantidad) + ", OBSERVACIONES = '" + observaciones + "' WHERE ORDEN_ORD_ID = " + str(id_orden) + " AND COMBO_COM_ID = " + str(id_combo) + ";")
+    conexion.commit()
+    conexion.close()
+
+def ModificarDetalleOrdenProducto(id_orden, id_producto, cantidad, observaciones):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("UPDATE DETALLE_ORDEN SET CANTIDAD = " + str(cantidad) + ", OBSERVACIONES = '" + observaciones + "' WHERE ORDEN_ORD_ID = " + str(id_orden) + " AND PRODUCTO_PRO_ID = " + str(id_producto) + ";")
