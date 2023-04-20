@@ -410,6 +410,17 @@ def EliminarProductoOrden(id_combo, id_cliente):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al eliminar el combo de la orden: " + str(e)})
 
+#Endpoint para confirmar una orden
+@app.route('/confirmarOrden/<id_cliente>', methods=['PUT'])
+def ConfirmarOrden(id_cliente):
+    try:
+        if controlador.ConfirmarOrdenCarrito(id_cliente):
+            return jsonify({"exito":True, "msg":"Se ha confirmado la orden correctamente."})
+        else :
+            return jsonify({'exito':False, "msg": "Error al confirmar la orden" })
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al confirmar la orden: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 

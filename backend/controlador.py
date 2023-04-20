@@ -428,3 +428,16 @@ def EliminarComboCarrito(id_combo, id_cliente):
     conexion.commit()
     conexion.close()
     return True
+
+# Controlador para confirmar orden
+def ConfirmarOrdenCarrito(id_cliente):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        IDORDEN = cursor.fetchone()
+        
+        cursor.execute("UPDATE ORDEN SET ESTADO = 'recibido' WHERE ORD_ID = %s;", (IDORDEN))
+        
+    conexion.commit()
+    conexion.close()
+    return True
