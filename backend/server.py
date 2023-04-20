@@ -453,7 +453,7 @@ def MostrarCarritoCliente(id_cliente):
 
 #Endpoint para mostrar el carrito de un cliente
 @app.route('/mostrarCarritoCombos/<id_cliente>', methods=['GET'])
-def MostrarCarritoCliente(id_cliente):
+def MostrarComboCarritoCliente(id_cliente):
     try:
         carrito = controlador.MostrarCarritoCombos(id_cliente)
         return jsonify({"exito":True, "carrito":carrito})
@@ -462,7 +462,7 @@ def MostrarCarritoCliente(id_cliente):
 
 #Endpoint para mostrar el carrito de un cliente
 @app.route('/mostrarProductosCombo/<id_combo>', methods=['GET'])
-def MostrarCarritoCliente(id_combo):
+def MostrarProductosCombo(id_combo):
     try:
         carrito = controlador.MostrarProductosDeUnCombo(id_combo)
         return jsonify({"exito":True, "carrito":carrito})
