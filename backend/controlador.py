@@ -262,6 +262,39 @@ def MostrarCombosConProductos(id_empresa):
     conexion.close()
     return combos
 
+# Controlador el cual obtiene toda la informacion que posee una orden como tambien su detalle
+def MostrarOrdenes(id_empresa):
+    conexion = obtener_conexion()
+    combos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT o.ORD_ID, c.CLI_ID, CONCAT(c.NOMBRE, ', ', c.APELLIDO) AS NOMBRE_COMPLETO_CLIENTE, d.LUGAR, 
+        r.REP_ID, CONCAT(r.NOMBRE, ', ', r.APELLIDO) AS NOMBRE_COMPLETO_REPARTIDOR, DATE_FORMAT(o.FECHA, '%d/%m/%Y') AS FECHA, o.ESTADO, o.CALIFICACION,
+        JSON_ARRAYAGG(JSON_OBJECT(
+        'ID_ARTICULO', CASE WHEN c2.COM_ID IS NULL THEN p.PRO_ID ELSE c2.COM_ID END, 
+        'NOMBRE_ARTICULO', CASE WHEN c2.NOMBRE IS NULL THEN p.NOMBRE ELSE c2.NOMBRE END, 
+        'PRECIO_ARTICULO', CASE WHEN c2.PRECIO IS NULL THEN p.PRECIO ELSE c2.PRECIO END,
+        'ES_COMBO', CASE WHEN c2.COM_ID IS NULL THEN FALSE ELSE TRUE END
+        ))
+        FROM ORDEN o
+        INNER JOIN CLIENTE c ON c.CLI_ID = o.CLIENTE_CLI_ID 
+        INNER JOIN DIRECCION d ON d.DIR_ID = o.DIRECCION_DIR_ID 
+        INNER JOIN REPARTIDOR r ON r.REP_ID = o.REPARTIDOR_REP_ID 
+        INNER JOIN DETALLE_ORDEN do ON do.ORDEN_ORD_ID = o.ORD_ID
+        LEFT JOIN COMBO c2 ON c2.COM_ID = do.COMBO_COM_ID 
+        LEFT JOIN PRODUCTO p ON p.PRO_ID = do.PRODUCTO_PRO_ID  
+        WHERE p.EMPRESA_EMP_ID = %s OR c2.COM_ID IN (SELECT COMBO_COM_ID FROM DETALLE_COMBO dc 
+        INNER JOIN PRODUCTO p ON p.PRO_ID = dc.PRODUCTO_PRO_ID
+        WHERE p.EMPRESA_EMP_ID = %s)
+        GROUP BY o.ORD_ID""", (id_empresa, id_empresa ))
+        combos = cursor.fetchall()
+        
+        if combos:
+            combos = [{"ORD_ID":combo[0], "CLI_ID":combo[1], "NOMBRE_COMPLETO_CLIENTE":combo[2], "LUGAR":combo[3], "REP_ID":combo[4], "NOMBRE_COMPLETO_REPARTIDOR": combo[5], "FECHA": combo[6], "ESTADO": combo[7], "CALIFICACION": combo[8], "DETALLE_ORDEN":json.loads(combo[9])}for combo in combos]
+        else:
+            combos = None
+    conexion.close()
+    return combos
+
 # Controlador para eliminar una empresa en la base de datos
 def EliminarEmpresa(id):
     conexion = obtener_conexion()
