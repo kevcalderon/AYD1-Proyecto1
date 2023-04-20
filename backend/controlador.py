@@ -563,5 +563,24 @@ def ModificarDetalleOrdenProducto(id_orden, id_producto, cantidad, observaciones
     conexion.commit()
     conexion.close()
 
-
+# Controlador para retornar los pedidos pendientes de asignacion de repartidor
+def VerPedidosPendientesRepartidor():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT ORD_ID, C.NOMBRE, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO  FROM ORDEN O
+        INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
+        INNER JOIN DIRECCION D on O.DIRECCION_DIR_ID = D.DIR_ID
+        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
+        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        INNER JOIN DIRECCION D3 on R.DIRECCION_DIR_ID = D3.DIR_ID
+        INNER JOIN MUNICIPIO M2 on D3.MUNICIPIO_MUN_ID = M2.MUN_ID
+        WHERE O.ESTADO = 'RECIBIDO' AND O.REPARTIDOR_REP_ID = NULL AND D2.DEP_ID = M2.DEPARTAMENTO_DEP_ID;""")
+        pendientes = cursor.fetchall()
+        lista_pedidos = []
+        for pedido in pendientes:
+            new_pendiente = {"ORD_ID":pedido[0], "CLIENTE":pedido[1], "DEPARTAMENTO":pedido[2], "MUNICIPIO":pedido[3], "LUGAR":pedido[4], "METODO_PAGO":pedido[5], "ESTADO":pedido[6]}
+            lista_pedidos.append(new_pendiente)
+        conexion.close()
+        return lista_pedidos
 
