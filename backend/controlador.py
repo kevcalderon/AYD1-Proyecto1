@@ -1,5 +1,6 @@
 from conexion import obtener_conexion
 from werkzeug.security import check_password_hash, generate_password_hash
+import json
 
 # Controlador para buscar un cliente en la base de datos
 def LoguearCliente(nombre_usuario, contrasenia):
@@ -199,6 +200,68 @@ def AgregarSolicitud(id_empresa, id_repartidor, tipo_solicitud, fecha, descripci
     conexion.commit()
     conexion.close()
 
+# Controlador para insertar un combo en la base de datos
+def CrearCombo(nombre, descripcion, precio, nombre_archivo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO COMBO (NOMBRE, DESCRIPCION, PRECIO, FOTOGRAFIA)
+        VALUES(%s, %s, %s, %s)""", (nombre, descripcion, precio, nombre_archivo))
+    conexion.commit()
+    conexion.close()
+
+# Controlador para insertar un combo en la base de datos
+def AgregarProductoACombo(id_combo, id_producto, cantidad, observaciones):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO DETALLE_COMBO (COMBO_COM_ID, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES)
+        VALUES(%s, %s, %s, %s)""", (id_combo, id_producto, cantidad, observaciones))
+    conexion.commit()
+    conexion.close()
+
+# Controlador que se encarga de obtener los id de los productos que estan enlazados a un combo
+def ObtenerProductoCombo(id_combo):
+    conexion = obtener_conexion()
+    ids_producto = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT PRODUCTO_PRO_ID FROM DETALLE_COMBO dc WHERE COMBO_COM_ID = %s""", (id_combo, ))
+        ids_producto = cursor.fetchall()
+    conexion.close()
+    return ids_producto
+
+# Controlador el cual obtiene toda la informacion que posee un combo
+def ObtenerCombo(id_combo):
+    conexion = obtener_conexion()
+    combos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT NOMBRE, DESCRIPCION, PRECIO, FOTOGRAFIA FROM COMBO c WHERE COM_ID = %s""", (id_combo, ))
+        combos = cursor.fetchall()
+        if combos:
+            combos = [{"NOMBRE":combo[0], "DESCRIPCION":combo[1], "PRECIO":combo[2], "FOTOGRAFIA":combo[3]}for combo in combos]
+        else:
+            combos = None            
+    conexion.close()
+    return combos
+
+# Controlador el cual obtiene toda la informacion que posee un combo como tambien su detalle
+def MostrarCombosConProductos(id_empresa):
+    conexion = obtener_conexion()
+    combos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT c.*, JSON_ARRAYAGG(JSON_OBJECT('id_producto', p.PRO_ID,'nombre', p.NOMBRE, 'cantidad', dc.CANTIDAD, 'observaciones', dc.OBSERVACIONES)) as detalle_combo
+        FROM DETALLE_COMBO dc 
+        INNER JOIN COMBO c ON c.COM_ID = dc.COMBO_COM_ID 
+        INNER JOIN PRODUCTO p ON p.PRO_ID = dc.PRODUCTO_PRO_ID 
+        WHERE p.EMPRESA_EMP_ID = %s
+        GROUP BY c.COM_ID""", (id_empresa, ))
+        combos = cursor.fetchall()
+        
+        if combos:
+            combos = [{"ID_COMBO":combo[0], "NOMBRE":combo[1], "DESCRIPCION":combo[2], "PRECIO":combo[3], "FOTOGRAFIA":combo[4], "DETALLE_COMBO":json.loads(combo[5])}for combo in combos]
+        else:
+            combos = None
+    conexion.close()
+    return combos
+
 # Controlador para eliminar una empresa en la base de datos
 def EliminarEmpresa(id):
     conexion = obtener_conexion()
@@ -212,6 +275,22 @@ def EliminarProducto(id):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("DELETE FROM PRODUCTO WHERE PRO_ID = %s", (id,))
+    conexion.commit()
+    conexion.close()
+
+# Controlador para eliminar un combo segun su id
+def EliminarCombo(id_combo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("DELETE FROM COMBO WHERE COM_ID = %s", (id_combo,))
+    conexion.commit()
+    conexion.close()
+
+# Controlador para eliminar el detalle de un combo segun el id del combo
+def EliminarDetalleCombo(id_combo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("DELETE FROM DETALLE_COMBO WHERE COMBO_COM_ID = %s", (id_combo,))
     conexion.commit()
     conexion.close()
 
@@ -240,8 +319,9 @@ def VerificarSesAdmin(usuario, contrasenia):
 def VerificarSesProveedor(usuario, contrasenia):
     conexion = obtener_conexion()
     proveedor = None
+    password_encriptado = generate_password_hash(contrasenia, "sha256", 30)
     with conexion.cursor() as cursor:
-        cursor.execute("select * from (((REPARTIDOR inner JOIN DIRECCION ON REPARTIDOR.DIRECCION_DIR_ID = DIRECCION.DIR_ID)INNER JOIN MUNICIPIO ON MUNICIPIO.MUN_ID = DIRECCION.MUNICIPIO_MUN_ID) INNER JOIN DEPARTAMENTO ON DEPARTAMENTO.DEP_ID = MUNICIPIO.DEPARTAMENTO_DEP_ID) WHERE USUARIO = %s and CONTRASENA = %s", (usuario,contrasenia,))
+        cursor.execute("select * from (((REPARTIDOR inner JOIN DIRECCION ON REPARTIDOR.DIRECCION_DIR_ID = DIRECCION.DIR_ID)INNER JOIN MUNICIPIO ON MUNICIPIO.MUN_ID = DIRECCION.MUNICIPIO_MUN_ID) INNER JOIN DEPARTAMENTO ON DEPARTAMENTO.DEP_ID = MUNICIPIO.DEPARTAMENTO_DEP_ID) WHERE USUARIO = %s and CONTRASENA = %s", (usuario,password_encriptado,))
         proveedor = cursor.fetchone()
     conexion.close()
     return {'REP_ID':proveedor[0],"DIRECCION_DIR_ID":proveedor[1],"NOMBRE":proveedor[2], "APELLIDO":proveedor[3],"CORREO":proveedor[4], "TELEFONO":proveedor[5], "USUARIO":proveedor[6], "CONTRASENA":proveedor[7], "NIT":proveedor[8],
@@ -251,6 +331,7 @@ def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit
     conexion = obtener_conexion()
     password_encriptado = generate_password_hash(contra, "sha256", 30)
     id_direccion = ""
+    id_repartidor = None 
     with conexion.cursor() as cursor:
         cursor.execute("CALL CrearDireccion("+str(id_muni)+",'"+lugar+"',@DIR_ID);")
     with conexion.cursor() as cursor:
@@ -259,8 +340,11 @@ def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit
     with conexion.cursor() as cursor:
         cursor.execute('''INSERT INTO REPARTIDOR(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, ESTADO,DOCUMENTO,LICENCIA,TRANSPORTE)
                           VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ "pendiente"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
+        cursor.execute("SELECT LAST_INSERT_ID();")
+        id_repartidor = cursor.fetchone()[0]
     conexion.commit()
     conexion.close()
+    return id_repartidor
 
 def ExistenciaUsuario(usuario, tabla):
     conexion = obtener_conexion()
@@ -269,8 +353,7 @@ def ExistenciaUsuario(usuario, tabla):
         valor = cursor.fetchone()[0]
         if valor != 0:
             return True
-        else:
-            return False
+        return False
 
 
 def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, tarjeta):
@@ -298,3 +381,206 @@ def ActualizarProducto(id_producto, id_tipo_producto, nombre, descripcion, preci
         (id_tipo_producto, nombre, descripcion, precio, stock, nombre_archivo, id_producto))
     conexion.commit()
     conexion.close()
+
+
+def UltimaEmpresa():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT MAX(EMP_ID) FROM EMPRESA")
+        id = cursor.fetchone()[0]
+    conexion.close()
+    return id
+
+# Controlador para ver obtener una lista de empresas
+def ObtenerEmpresas():
+    conexion = obtener_conexion()
+    empresaslist = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM EMPRESA")
+        empresaslist = cursor.fetchall()
+    conexion.close()
+    return [{"EMP_ID":empresas[0], "DIRECCION_DIR_ID":empresas[1], "TIPO_EMPRESA_T_EMP_ID":empresas[2],
+"NOMBRE":empresas[3], "DESCRIPCION":empresas[4], "CORREO":empresas[5], "TELEFONO":empresas[6], "USUARIO":empresas[7],
+"CONTRASENA":empresas[8], "ESTADO":empresas[9],"NIT":empresas[10], "DOCUMENTO":empresas[11]}for empresas in empresaslist]
+
+# Controlador para ver obtener una lista de combos con sus datos
+def ObtenerlistaCombosEmpresa(id_empresa):
+    conexion = obtener_conexion()
+    listacombos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("select DISTINCT COMBO_COM_ID, COMBO.NOMBRE AS NOMBRE_COMBO, COMBO.DESCRIPCION AS DESCRIPCION_COMBO, COMBO.PRECIO AS PRECIO_COMBO, COMBO.FOTOGRAFIA AS FOTOGRAFIA_COMBO  from ((DETALLE_COMBO inner join COMBO on DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID )INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID) where PRODUCTO.EMPRESA_EMP_ID = %s;", (id_empresa,))
+        combos = cursor.fetchall()
+        for combo in combos:
+            
+            cursor.execute("select PRODUCTO_PRO_ID, EMPRESA_EMP_ID, TIPO_PRODUCTO_T_PRO_ID, PRODUCTO.NOMBRE, PRODUCTO.DESCRIPCION, PRODUCTO.PRECIO, STOCK, PRODUCTO.FOTOGRAFIA, CANTIDAD, OBSERVACIONES from ((DETALLE_COMBO inner join COMBO on DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID )INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID) where COMBO.COM_ID = %s;", (combo[0],))             
+            productos = cursor.fetchall()       
+            listaproductos = []
+            for producto in productos:
+                newproducto = {"PRODUCTO_PRO_ID": producto[0], "EMPRESA_EMP_ID": producto[1], "TIPO_PRODUCTO_T_PRO_ID": producto[2], "NOMBRE": producto[3], "DESCRIPCION": producto[4], "PRECIO": producto[5], "STOCK": producto[6], "FOTOGRAFIA": producto[7], "CANTIDAD": producto[8], "OBSERVACIONES": producto[9]}
+                listaproductos.append(newproducto)
+                
+            newcombo = {"COMBO_COM_ID": combo[0], "NOMBRE_COMBO": combo[1], "DESCRIPCION_COMBO": combo[2], "PRECIO_COMBO": combo[3], "FOTOGRAFIA_COMBO": combo[4], "PRODUCTOS": listaproductos}
+            listacombos.append(newcombo)
+    conexion.close()
+    return listacombos
+
+# Controlador para eliminar producto del carrito
+def EliminarProductoCarrito(id_producto, id_cliente):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        IDCOMBO = cursor.fetchone()
+        
+        cursor.execute("DELETE FROM DETALLE_ORDEN WHERE PRODUCTO_PRO_ID = %s AND PRODUCTO_PRO_ID = %s;", (id_producto, IDCOMBO))
+        
+    conexion.commit()
+    conexion.close()
+    return True
+
+# Controlador para eliminar producto del carrito
+def EliminarComboCarrito(id_combo, id_cliente):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        IDCOMBO = cursor.fetchone()
+        
+        cursor.execute("DELETE FROM DETALLE_ORDEN WHERE PRODUCTO_PRO_ID = %s AND COMBO_COM_ID = %s;", (id_combo, IDCOMBO))
+        
+    conexion.commit()
+    conexion.close()
+    return True
+
+# Controlador para confirmar orden
+def ConfirmarOrdenCarrito(id_cliente):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        IDORDEN = cursor.fetchone()
+        
+        cursor.execute("UPDATE ORDEN SET ESTADO = 'recibido' WHERE ORD_ID = %s;", (IDORDEN))
+        
+    conexion.commit()
+    conexion.close()
+    return True
+
+
+def AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones, estado):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("INSERT INTO DETALLE_ORDEN (COMBO_COM_ID, ORDEN_ORD_ID, CANTIDAD, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES,ESTADO)" + 
+                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(cantidad) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + estado + "');")
+    conexion.commit()
+    conexion.close()
+
+
+def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
+    conexion = obtener_conexion()
+    id_orden = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+    if id_orden is None:
+        with conexion.cursor() as cursor:
+            cursor.execute("INSERT INTO ORDEN (CLIENTE_CLI_ID, DIRECCION_DIR_ID, REPARTIDOR_REP_ID, FECHA, ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO)" + 
+                       "VALUES (" + str(id_cliente) + "," + str(id_direccion) + "," + str(id_repartidor) + ",'" + fecha + "','" + "" + "'," + str(calificacion) + ",'" + comentario + "','" + metodo_pago + "');")
+        cursor.execute("SELECT LAST_INSERT_ID();")
+        id_orden = cursor.fetchone()[0]
+    conexion.commit()
+    conexion.close()
+    return id_orden
+
+def MostrarCarrito(id_cliente):
+    conexion = obtener_conexion()
+    id_orden = None
+    contenido = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+    if id_orden is None:
+        cursor.execute("select PRO_ID, EMPRESA_EMP_ID, NOMBRE, DESCRIPCION, PRECIO, STOCK, FOTOGRAFIA from ((ORDEN inner JOIN DETALLE_ORDEN ON DETALLE_ORDEN.COMBO_COM_ID = ORDEN.ORD_ID) INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_ORDEN.PRODUCTO_PRO_ID) where ORD_ID = %s;", (id_orden,))
+        contenidofetch = cursor.fetchall()
+        contenido = {"PRO_ID": contenidofetch[0], "EMPRESA_EMP_ID": contenidofetch[1], "NOMBRE": contenidofetch[2], "DESCRIPCION": contenidofetch[3], "PRECIO": contenidofetch[4], "STOCK": contenidofetch[5], "FOTOGRAFIA": contenidofetch[6]}
+    return contenido
+
+def MostrarCarritoCombos(id_cliente):
+    conexion = obtener_conexion()
+    id_orden = None
+    contenido = None
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+    if id_orden is None:
+        cursor.execute("select COM_ID, NOMBRE, DESCRIPCION, PRECIO, FOTOGRAFIA from ((ORDEN inner JOIN DETALLE_ORDEN ON DETALLE_ORDEN.COMBO_COM_ID = ORDEN.ORD_ID) INNER JOIN COMBO ON COMBO.COM_ID = DETALLE_ORDEN.ORDEN_ORD_ID) where ORD_ID = %s;", (id_orden,))
+        contenidofetch = cursor.fetchall()
+        contenido = [{"COM_ID":combo[0],"NOMBRE": combo[1],"DESCRIPCION": combo[2], "PRECIO": combo[3], "FOTOGRAFIA":combo[4]}for combo in contenidofetch]
+    return contenido
+        
+        
+def MostrarProductosDeUnCombo(id_combo):
+    conexion = obtener_conexion()    
+    with conexion.cursor() as cursor:
+        cursor.execute("select PRODUCTO_PRO_ID, EMPRESA_EMP_ID, TIPO_PRODUCTO_T_PRO_ID, PRODUCTO.NOMBRE, PRODUCTO.DESCRIPCION, PRODUCTO.PRECIO, STOCK, PRODUCTO.FOTOGRAFIA, CANTIDAD, OBSERVACIONES from ((DETALLE_COMBO inner join COMBO on DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID )INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID) where COMBO.COM_ID = %s;", (id_combo,))
+        productos = cursor.fetchall()
+        listaproductos = []
+        for producto in productos:
+            newproducto = {"PRODUCTO_PRO_ID": producto[0], "EMPRESA_EMP_ID": producto[1], "TIPO_PRODUCTO_T_PRO_ID": producto[2], "NOMBRE": producto[3], "DESCRIPCION": producto[4], "PRECIO": producto[5], "STOCK": producto[6], "FOTOGRAFIA": producto[7], "CANTIDAD": producto[8], "OBSERVACIONES": producto[9]}
+            listaproductos.append(newproducto)
+    return listaproductos  
+
+
+def ModificarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+        cursor.execute("UPDATE ORDEN SET CLIENTE_CLI_ID = " + str(id_cliente) + ", DIRECCION_DIR_ID = " + str(id_direccion) + ", REPARTIDOR_REP_ID = " + str(id_repartidor) + ", FECHA = '" + fecha + "', CALIFICACION = " + str(calificacion) + ", COMENTARIO = '" + comentario + "', METODO_PAGO = '" + metodo_pago + "' WHERE ORD_ID = " + str(id_orden) + ";")
+    conexion.commit()
+    conexion.close()
+    return id_orden
+
+def ModificarComboCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
+        id_orden = cursor.fetchone()[0]
+        cursor.execute("UPDATE ORDEN SET CLIENTE_CLI_ID = " + str(id_cliente) + ", DIRECCION_DIR_ID = " + str(id_direccion) + ", REPARTIDOR_REP_ID = " + str(id_repartidor) + ", FECHA = '" + fecha + "', CALIFICACION = " + str(calificacion) + ", COMENTARIO = '" + comentario + "', METODO_PAGO = '" + metodo_pago + "' WHERE ORD_ID = " + str(id_orden) + ";")
+    conexion.commit()
+    conexion.close()
+    return id_orden
+
+
+def ModificarDetalleOrdenCombo(id_orden, id_combo, cantidad, observaciones):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("UPDATE DETALLE_ORDEN SET CANTIDAD = " + str(cantidad) + ", OBSERVACIONES = '" + observaciones + "' WHERE ORDEN_ORD_ID = " + str(id_orden) + " AND COMBO_COM_ID = " + str(id_combo) + ";")
+    conexion.commit()
+    conexion.close()
+
+def ModificarDetalleOrdenProducto(id_orden, id_producto, cantidad, observaciones):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("UPDATE DETALLE_ORDEN SET CANTIDAD = " + str(cantidad) + ", OBSERVACIONES = '" + observaciones + "' WHERE ORDEN_ORD_ID = " + str(id_orden) + " AND PRODUCTO_PRO_ID = " + str(id_producto) + ";")
+    conexion.commit()
+    conexion.close()
+
+# Controlador para retornar los pedidos pendientes de asignacion de repartidor
+def VerPedidosPendientesRepartidor():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT ORD_ID, C.NOMBRE, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO  FROM ORDEN O
+        INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
+        INNER JOIN DIRECCION D on O.DIRECCION_DIR_ID = D.DIR_ID
+        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
+        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        INNER JOIN DIRECCION D3 on R.DIRECCION_DIR_ID = D3.DIR_ID
+        INNER JOIN MUNICIPIO M2 on D3.MUNICIPIO_MUN_ID = M2.MUN_ID
+        WHERE O.ESTADO = 'RECIBIDO' AND O.REPARTIDOR_REP_ID = NULL AND D2.DEP_ID = M2.DEPARTAMENTO_DEP_ID;""")
+        pendientes = cursor.fetchall()
+        lista_pedidos = []
+        for pedido in pendientes:
+            new_pendiente = {"ORD_ID":pedido[0], "CLIENTE":pedido[1], "DEPARTAMENTO":pedido[2], "MUNICIPIO":pedido[3], "LUGAR":pedido[4], "METODO_PAGO":pedido[5], "ESTADO":pedido[6]}
+            lista_pedidos.append(new_pendiente)
+        conexion.close()
+        return lista_pedidos
+
