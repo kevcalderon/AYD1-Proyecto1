@@ -490,7 +490,7 @@ def ConfirmarOrdenCarrito(id_cliente):
         cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = '';")
         IDORDEN = cursor.fetchone()
         
-        cursor.execute("UPDATE ORDEN SET ESTADO = 'recibido' WHERE ORD_ID = %s;", (IDORDEN))
+        cursor.execute("UPDATE ORDEN SET ESTADO = 'PENDIENTE' WHERE ORD_ID = %s;", (IDORDEN))
         
     conexion.commit()
     conexion.close()
