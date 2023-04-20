@@ -380,3 +380,24 @@ def ObtenerEmpresas():
     return [{"EMP_ID":empresas[0], "DIRECCION_DIR_ID":empresas[1], "TIPO_EMPRESA_T_EMP_ID":empresas[2],
 "NOMBRE":empresas[3], "DESCRIPCION":empresas[4], "CORREO":empresas[5], "TELEFONO":empresas[6], "USUARIO":empresas[7],
 "CONTRASENA":empresas[8], "ESTADO":empresas[9],"NIT":empresas[10], "DOCUMENTO":empresas[11]}for empresas in empresaslist]
+
+# Controlador para ver obtener una lista de combos con sus datos
+def ObtenerlistaCombosEmpresa(id_empresa):
+    conexion = obtener_conexion()
+    listacombos = []
+    with conexion.cursor() as cursor:
+        cursor.execute("select DISTINCT COMBO_COM_ID, COMBO.NOMBRE AS NOMBRE_COMBO, COMBO.DESCRIPCION AS DESCRIPCION_COMBO, COMBO.PRECIO AS PRECIO_COMBO, COMBO.FOTOGRAFIA AS FOTOGRAFIA_COMBO  from ((DETALLE_COMBO inner join COMBO on DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID )INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID) where PRODUCTO.EMPRESA_EMP_ID = %s;", (id_empresa,))
+        combos = cursor.fetchall()
+        for combo in combos:
+            
+            cursor.execute("select PRODUCTO_PRO_ID, EMPRESA_EMP_ID, TIPO_PRODUCTO_T_PRO_ID, PRODUCTO.NOMBRE, PRODUCTO.DESCRIPCION, PRODUCTO.PRECIO, STOCK, PRODUCTO.FOTOGRAFIA, CANTIDAD, OBSERVACIONES from ((DETALLE_COMBO inner join COMBO on DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID )INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID) where COMBO.COM_ID = %s;", (combo[0],))             
+            productos = cursor.fetchall()       
+            listaproductos = []
+            for producto in productos:
+                newproducto = {"PRODUCTO_PRO_ID": producto[0], "EMPRESA_EMP_ID": producto[1], "TIPO_PRODUCTO_T_PRO_ID": producto[2], "NOMBRE": producto[3], "DESCRIPCION": producto[4], "PRECIO": producto[5], "STOCK": producto[6], "FOTOGRAFIA": producto[7], "CANTIDAD": producto[8], "OBSERVACIONES": producto[9]}
+                listaproductos.append(newproducto)
+                
+            newcombo = {"COMBO_COM_ID": combo[0], "NOMBRE_COMBO": combo[1], "DESCRIPCION_COMBO": combo[2], "PRECIO_COMBO": combo[3], "FOTOGRAFIA_COMBO": combo[4], "PRODUCTOS": listaproductos}
+            listacombos.append(newcombo)
+    conexion.close()
+    return listacombos

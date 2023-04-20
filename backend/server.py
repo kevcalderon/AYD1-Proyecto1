@@ -379,6 +379,15 @@ def ObtenerListaEmpresas():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al obtener las empresas: " + str(e)})
 
+#Endpoint para obtener los combos de una empresa
+@app.route('/obtenerCombosEmpresa/<id_empresa>', methods=['GET'])
+def ObtenerCombosEmpresa(id_empresa):
+    try:
+        combos = controlador.ObtenerlistaCombosEmpresa(id_empresa)
+        return jsonify({"exito":True, "combos":combos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al obtener los combos: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
