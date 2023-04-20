@@ -537,6 +537,15 @@ def VerPedidosPendientesRepartidor():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los pedidos pendientes de asignacion de repartidor: " + str(e)})   
 
+# Endpoint para ver el pedido el asignado del repartidor
+@app.route('/VerPedidoAsignadoRepartidor/<nombre>', methods=['GET'])
+def VerPedidoAsignadoRepartidor(nombre):
+    try:
+        pedidos = controlador.VerPedidoAsignadoRepartidor(nombre)
+        return jsonify({"exito":True, "pedidos":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar el pedido asignado del repartidor: " + str(e)})   
+
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
