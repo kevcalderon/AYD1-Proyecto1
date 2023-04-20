@@ -421,6 +421,27 @@ def ConfirmarOrden(id_cliente):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al confirmar la orden: " + str(e)})
 
+@app.route('/AgregarProductoCarrito', methods=['POST'])
+def AgregarProductoCarrito():
+    try:
+        id_cliente = request.form['id_cliente']
+        id_direccion = request.form['id_direccion']
+        id_repartidor = request.form['id_repartidor']
+        fecha = request.form['fecha']
+        calificacion = request.form['calificacion']
+        comentario = request.form['comentario']
+        metodo_pago = request.form['metodo_pago']
+        id_combo = request.form['id_combo']
+        cantidad = request.form['cantidad']
+        id_producto = request.form['id_producto']
+        observaciones = request.form['observaciones']
+        estado = request.form['estado']
+        id_orden = controlador.AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago)
+        controlador.AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones, estado)
+        return jsonify({"exito":True, "msg":"Se ha agregado el producto al carrito correctamente."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al agregar el producto al carrito: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
