@@ -684,9 +684,6 @@ def VerPedidoAsignadoRepartidor(nombre):
 def AsignarPedidoRepartidor(id_ord, usuario_rep):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""UPDATE ORDEN O
-        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
-        SET O.ESTADO = 'EN PROCESO'
-        WHERE O.ESTADO = 'RECIBIDO' AND O.ORD_ID=%s AND R.USUARIO=%s""", (id_ord, usuario_rep))
+        cursor.execute("CALL AsignarPedidoRepartidor(%s,%s)", (id_ord, usuario_rep))
         conexion.commit()
         conexion.close()
