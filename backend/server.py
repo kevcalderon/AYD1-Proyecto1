@@ -569,7 +569,20 @@ def AsignarPedidoRepartidor():
         controlador.AsignarPedidoRepartidor(id_ord, user_rep)
         return jsonify({"exito":True, "msj":"Pedido asignado exitosamente"})
     except Exception as e:
-        return jsonify({'exito':False, "msg": "Error al asignar el pedido al repartidor: " + str(e)})  
+        return jsonify({'exito':False, "msg": "Error al asignar el pedido al repartidor: " + str(e)}) 
+
+# Endpoint para cambiear el estado del pedido a "ENTREGADO" cuando el repartidor lo entrega
+@app.route('/EntregarPedidoRepartidor', methods=['PUT'])
+def EntregarPedidoRepartidor():
+    try:
+        resp = request.json
+        ord_id = resp[0]
+        usuario = resp[1]
+        controlador.EntregarPedidoRepartidor(ord_id, usuario)
+        return jsonify({"exito":True, "msj":"Pedido entregado exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al marcar el pedido como 'ENTREGADO': " + str(e)}) 
+
 
 
 if __name__ == '__main__':
