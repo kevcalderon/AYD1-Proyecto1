@@ -546,6 +546,18 @@ def VerPedidoAsignadoRepartidor(nombre):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar el pedido asignado del repartidor: " + str(e)})   
 
+# Endpoint para cambiar el estado del pedido a "EN PROCESO" cuando un repartidor se lo asigna
+@app.route('/AsignarPedidoRepartidor', methods=['PUT'])
+def AsignarPedidoRepartidor():
+    try:
+        pet = request.json
+        id_ord = pet[0]
+        user_rep = pet[1]
+        controlador.AsignarPedidoRepartidor(id_ord, user_rep)
+        return jsonify({"exito":True, "msj":"Pedido asignado exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al asignar el pedido al repartidor: " + str(e)})  
+
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")

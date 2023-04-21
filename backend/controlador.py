@@ -664,3 +664,14 @@ def VerPedidoAsignadoRepartidor(nombre):
                 lista_p.append(new_prod)
         asignado = {"CLIENTE":pedido[0]+" "+pedido[1], "DEPARTAMENTO":pedido[2], "MUNICIPIO":pedido[3], "LUGAR":pedido[4], "METODO_PAGO":pedido[5], "ESTADO":pedido[6], "PRODUCTOS":lista_p}
         return asignado
+    
+#Controlador para cambiar el estado del producto asignado
+def AsignarPedidoRepartidor(id_ord, usuario_rep):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE ORDEN O
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        SET O.ESTADO = 'EN PROCESO'
+        WHERE O.ESTADO = 'RECIBIDO' AND O.ORD_ID=%s AND R.USUARIO=%s""", (id_ord, usuario_rep))
+        conexion.commit()
+        conexion.close()
