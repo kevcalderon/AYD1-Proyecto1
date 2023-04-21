@@ -769,3 +769,18 @@ def VerCombosPorTipo(tipo):
         lista_combos = [{"COM_ID": combo[0], "NOMBRE": combo[1], "DESCRIPCION": combo[2], "PRECIO": combo[3], "FOTOGRAFIA": combo[4]} for combo in combos]        
         conexion.close()
         return lista_combos
+    
+#Controlador para ver el perfil del repartidor logueado
+def VerPerfilRepartidor(usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT R.NOMBRE, R.APELLIDO, R.USUARIO, R.CONTRASENA, R.CORREO, R.NIT, D2.NOMBRE, M.NOMBRE, D.LUGAR, R.LICENCIA, R.TRANSPORTE, R.DOCUMENTO FROM REPARTIDOR R
+        INNER JOIN DIRECCION D on R.DIRECCION_DIR_ID = D.DIR_ID
+        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
+        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
+        WHERE R.USUARIO =%s """,(usuario,))
+        logueado = cursor.fetchone()[0]
+        new_user = {"NOMBRE":logueado[0], "APELLIDO":logueado[1], "USUARIO":logueado[2], "CONTRASENA":logueado[3], "CORREO":logueado[4], "NIT":logueado[5], "DEPARTAMENTO":logueado[6], "MUNICIPIO":logueado[7], "LUGAR":logueado[8], "LICENCIA":logueado[9], "TRANSPORTE":logueado[10],"DOCUMENTO":logueado[11]}
+        conexion.close()
+        return new_user
+       

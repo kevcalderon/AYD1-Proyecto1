@@ -618,6 +618,18 @@ def VerCombosPorTipoProduct(tipo):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los combos por tipo de producto: " + str(e)})
 
+
+
+#Endpoint para ver los datos del repartidor logueado
+@app.route('/VerPerfilRepartidor/<usuario>', methods=['GET'])
+def VerPerfilRepartidor(usuario):
+    try:
+        perfil = controlador.VerPerfilRepartidor(usuario)
+        return jsonify({"exito":True, "repartidor":perfil})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los datos del repartidor logueado: " + str(e)})
+
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
