@@ -601,6 +601,14 @@ def VerEmpresasPorTip(tipo):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar las empresas por tipo: " + str(e)})
 
+@app.route('/VerCombosPorProducto/<id_producto>', methods=['GET'])
+def VerCombosPorProduct(id_producto):
+    try:
+        combos = controlador.VerCombosPorProducto(id_producto)
+        return jsonify({"exito":True, "combos":combos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los combos por producto: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
