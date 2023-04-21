@@ -583,7 +583,13 @@ def EntregarPedidoRepartidor():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al marcar el pedido como 'ENTREGADO': " + str(e)}) 
 
-
+@app.route('/VerTiposProductos', methods=['GET'])
+def VerTiposProduct():
+    try:
+        tipos = controlador.VerTiposProductos()
+        return jsonify({"exito":True, "tipos":tipos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los tipos de productos: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")

@@ -698,3 +698,15 @@ def EntregarPedidoRepartidor(ord_id, usuario):
         WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID=%s AND R.USUARIO = %s;""", (ord_id, usuario))
         conexion.commit()
         conexion.close()
+
+def VerTiposProductos():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT PRO_ID, NOMBRE FROM PRODUCTO")
+        tipos = cursor.fetchall()
+        lista_tipos = []
+        for tipo in tipos:
+            new_tipo = {"PRO_ID":tipo[0], "NOMBRE":tipo[1]}
+            lista_tipos.append(new_tipo)
+        conexion.close()
+        return lista_tipos
