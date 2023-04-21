@@ -819,3 +819,12 @@ WHERE ORDEN.CLIENTE_CLI_ID = %s;""",(usuario,))
         ordeneslist = cursor.fetchall()
         lista_ordenes = [{"ORD_ID":ordenes[0], "DIRECCION_DIR_ID":ordenes[1], "LUGAR_DIRECCION":ordenes[2], "REPARTIDOR_REP_ID":ordenes[3], "NOMBRE_REPARTIDOR":ordenes[4], "APELLIDO_REPARTIDOR":ordenes[5], "FECHA":ordenes[6], "ESTADO":ordenes[7], "CALIFICACION":ordenes[8], "COMENTARIO":ordenes[9], "METODO_PAGO":ordenes[10]} for ordenes in ordeneslist]
         return lista_ordenes
+    
+#Controlador para actualizar el comentario y la calificacion de una orden
+def ActualizarOrden(id_orden, comentario, calificacion):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE ORDEN SET CALIFICACION = %s, COMENTARIO = %s WHERE ORD_ID = %s;""",(calificacion, comentario, id_orden))
+        conexion.commit()
+        conexion.close()
+        return True

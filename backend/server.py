@@ -639,6 +639,19 @@ def VerOrdenesClient(id_cliente):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar las ordenes del cliente: " + str(e)})
 
+#Endpoint para actualizar el comentario y la calificacion de una orden
+@app.route('/ActualizarComentarioCalificacion', methods=['PUT'])
+def ActualizarComentarioCalificacionOrden():
+    try:        
+        id_orden = request.form['id_orden']
+        comentario = request.form['comentario']
+        calificacion = request.form['calificacion']
+        controlador.ActualizarOrden(id_orden, comentario, calificacion)
+        return jsonify({"exito":True, "msj":"Comentario y calificacion actualizados exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al actualizar el comentario y la calificacion: " + str(e)})
+
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
