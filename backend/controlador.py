@@ -771,7 +771,7 @@ def VerCombosPorTipo(tipo):
         return lista_combos
     
 #Controlador para ver el perfil del repartidor logueado
-def VerPerfilRepartidor(usuario):
+def VerPerfilRepartidor(usuario, mes):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("""SELECT R.NOMBRE, R.APELLIDO, R.USUARIO, R.CONTRASENA, R.CORREO, R.NIT, D2.NOMBRE, M.NOMBRE, D.LUGAR, R.LICENCIA, R.TRANSPORTE, R.DOCUMENTO FROM REPARTIDOR R
@@ -780,7 +780,31 @@ def VerPerfilRepartidor(usuario):
         INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
         WHERE R.USUARIO =%s """,(usuario,))
         logueado = cursor.fetchone()[0]
-        new_user = {"NOMBRE":logueado[0], "APELLIDO":logueado[1], "USUARIO":logueado[2], "CONTRASENA":logueado[3], "CORREO":logueado[4], "NIT":logueado[5], "DEPARTAMENTO":logueado[6], "MUNICIPIO":logueado[7], "LUGAR":logueado[8], "LICENCIA":logueado[9], "TRANSPORTE":logueado[10],"DOCUMENTO":logueado[11]}
+        calificacion = VerCalificacionPromedioRepartidor(usuario, mes)
+        comision = VerComisionRepartidor(usuario, mes)
+        new_user = {"NOMBRE":logueado[0], "APELLIDO":logueado[1], "USUARIO":logueado[2], "CONTRASENA":logueado[3], "CORREO":logueado[4], "NIT":logueado[5], "DEPARTAMENTO":logueado[6], "MUNICIPIO":logueado[7], "LUGAR":logueado[8], "LICENCIA":logueado[9], "TRANSPORTE":logueado[10],"DOCUMENTO":logueado[11],"CALIFICACION":calificacion, "COMISION":comision}
         conexion.close()
         return new_user
        
+#Controlador que retorna la calificacion promedio en el mes del repartidor logueado
+def VerCalificacionPromedioRepartidor(usuario, mes):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT AVG(O.CALIFICACION) FROM ORDEN O
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        WHERE R.USUARIO = %s AND MONTH(O.FECHA) = %s;""",(usuario,mes))
+        valor = cursor.fetchone()[0]
+        conexion.close()
+        return valor
+    
+#Controlador para ver las comisiones generadas en el mes del repartidor logueado
+def VerComisionRepartidor(usuario, mes):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT SUM(V.TOTAL)*0.05 AS COMISION FROM VENTA V
+        INNER JOIN ORDEN O on V.ORDEN_ORD_ID = O.ORD_ID
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        WHERE R.USUARIO =%s AND MONTH(V.FECHA) = %s""", (usuario, mes)) 
+        valor = cursor.fetchone()[0]
+        conexion.close()
+        return valor

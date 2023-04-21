@@ -624,7 +624,8 @@ def VerCombosPorTipoProduct(tipo):
 @app.route('/VerPerfilRepartidor/<usuario>', methods=['GET'])
 def VerPerfilRepartidor(usuario):
     try:
-        perfil = controlador.VerPerfilRepartidor(usuario)
+        mes_actual = datetime.now().month
+        perfil = controlador.VerPerfilRepartidor(usuario, mes_actual)
         return jsonify({"exito":True, "repartidor":perfil})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los datos del repartidor logueado: " + str(e)})
