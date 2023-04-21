@@ -702,11 +702,11 @@ def EntregarPedidoRepartidor(ord_id, usuario):
 def VerTiposProductos():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT PRO_ID, NOMBRE FROM PRODUCTO")
+        cursor.execute("SELECT * FROM TIPO_PRODUCTO;")
         tipos = cursor.fetchall()
         lista_tipos = []
         for tipo in tipos:
-            new_tipo = {"PRO_ID":tipo[0], "NOMBRE":tipo[1]}
+            new_tipo = {"T_PRO_ID":tipo[0], "NOMBRE":tipo[1]}
             lista_tipos.append(new_tipo)
         conexion.close()
         return lista_tipos
