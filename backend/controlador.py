@@ -753,3 +753,69 @@ def VerCombosPorProducto(producto_id):
         lista_combos.append(combo_temp)
         conexion.close()
         return lista_combos
+
+#Controlador para ver los combos por el tipo del producto
+def VerCombosPorTipo(tipo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        sql = """SELECT DISTINCT c.COM_ID, c.NOMBRE, c.DESCRIPCION, c.PRECIO, c.FOTOGRAFIA
+                 FROM COMBO c
+                 JOIN DETALLE_COMBO dc ON c.COM_ID = dc.COMBO_COM_ID
+                 JOIN PRODUCTO p ON dc.PRODUCTO_PRO_ID = p.PRO_ID
+                 JOIN TIPO_PRODUCTO tp ON p.TIPO_PRODUCTO_T_PRO_ID = tp.T_PRO_ID
+                 WHERE tp.T_PRO_ID = %s"""
+        cursor.execute(sql, (tipo,))
+        combos = cursor.fetchall()
+        lista_combos = [{"COM_ID": combo[0], "NOMBRE": combo[1], "DESCRIPCION": combo[2], "PRECIO": combo[3], "FOTOGRAFIA": combo[4]} for combo in combos]        
+        conexion.close()
+        return lista_combos
+    
+#Controlador para ver el perfil del repartidor logueado
+def VerPerfilRepartidor(usuario, mes):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT R.NOMBRE, R.APELLIDO, R.USUARIO, R.CONTRASENA, R.CORREO, R.NIT, D2.NOMBRE, M.NOMBRE, D.LUGAR, R.LICENCIA, R.TRANSPORTE, R.DOCUMENTO FROM REPARTIDOR R
+        INNER JOIN DIRECCION D on R.DIRECCION_DIR_ID = D.DIR_ID
+        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
+        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
+        WHERE R.USUARIO =%s """,(usuario,))
+        logueado = cursor.fetchone()[0]
+        calificacion = VerCalificacionPromedioRepartidor(usuario, mes)
+        comision = VerComisionRepartidor(usuario, mes)
+        new_user = {"NOMBRE":logueado[0], "APELLIDO":logueado[1], "USUARIO":logueado[2], "CONTRASENA":logueado[3], "CORREO":logueado[4], "NIT":logueado[5], "DEPARTAMENTO":logueado[6], "MUNICIPIO":logueado[7], "LUGAR":logueado[8], "LICENCIA":logueado[9], "TRANSPORTE":logueado[10],"DOCUMENTO":logueado[11],"CALIFICACION":calificacion, "COMISION":comision}
+        conexion.close()
+        return new_user
+       
+#Controlador que retorna la calificacion promedio en el mes del repartidor logueado
+def VerCalificacionPromedioRepartidor(usuario, mes):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT AVG(O.CALIFICACION) FROM ORDEN O
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        WHERE R.USUARIO = %s AND MONTH(O.FECHA) = %s;""",(usuario,mes))
+        valor = cursor.fetchone()[0]
+        conexion.close()
+        return valor
+    
+#Controlador para ver las comisiones generadas en el mes del repartidor logueado
+def VerComisionRepartidor(usuario, mes):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT SUM(V.TOTAL)*0.05 AS COMISION FROM VENTA V
+        INNER JOIN ORDEN O on V.ORDEN_ORD_ID = O.ORD_ID
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        WHERE R.USUARIO =%s AND MONTH(V.FECHA) = %s""", (usuario, mes)) 
+        valor = cursor.fetchone()[0]
+        conexion.close()
+        return valor
+
+#Controlador para ver las ordenes de un cliente
+def VerOrdenesCliente(usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""select ORD_ID, ORDEN.DIRECCION_DIR_ID, DIRECCION.LUGAR AS LUGAR_DIRECCION, REPARTIDOR_REP_ID, REPARTIDOR.NOMBRE, REPARTIDOR.APELLIDO ,FECHA, ORDEN.ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO  
+from ((ORDEN INNER JOIN DIRECCION ON DIRECCION.DIR_ID = ORDEN.DIRECCION_DIR_ID)INNER JOIN REPARTIDOR ON REPARTIDOR.REP_ID = ORDEN.REPARTIDOR_REP_ID)
+WHERE ORDEN.CLIENTE_CLI_ID = %s;""",(usuario,))
+        ordeneslist = cursor.fetchall()
+        lista_ordenes = [{"ORD_ID":ordenes[0], "DIRECCION_DIR_ID":ordenes[1], "LUGAR_DIRECCION":ordenes[2], "REPARTIDOR_REP_ID":ordenes[3], "NOMBRE_REPARTIDOR":ordenes[4], "APELLIDO_REPARTIDOR":ordenes[5], "FECHA":ordenes[6], "ESTADO":ordenes[7], "CALIFICACION":ordenes[8], "COMENTARIO":ordenes[9], "METODO_PAGO":ordenes[10]} for ordenes in ordeneslist]
+        return lista_ordenes

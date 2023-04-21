@@ -609,6 +609,36 @@ def VerCombosPorProduct(id_producto):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los combos por producto: " + str(e)})
 
+#Endpoint para ver los combos por el tipo de producto
+@app.route('/VerCombosPorTipoProducto/<tipo>', methods=['GET'])
+def VerCombosPorTipoProduct(tipo):
+    try:
+        combos = controlador.VerCombosPorTipo(tipo)
+        return jsonify({"exito":True, "combos":combos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los combos por tipo de producto: " + str(e)})
+
+
+
+#Endpoint para ver los datos del repartidor logueado
+@app.route('/VerPerfilRepartidor/<usuario>', methods=['GET'])
+def VerPerfilRepartidor(usuario):
+    try:
+        mes_actual = datetime.now().month
+        perfil = controlador.VerPerfilRepartidor(usuario, mes_actual)
+        return jsonify({"exito":True, "repartidor":perfil})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los datos del repartidor logueado: " + str(e)})
+
+#Endpoint para ver toda las ordenes de un cliente
+@app.route('/VerOrdenesCliente/<id_cliente>', methods=['GET'])
+def VerOrdenesClient(id_cliente):
+    try:
+        ordenes = controlador.VerOrdenesCliente(id_cliente)
+        return jsonify({"exito":True, "ordenes":ordenes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las ordenes del cliente: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
