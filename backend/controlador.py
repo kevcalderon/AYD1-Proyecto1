@@ -847,3 +847,23 @@ def ActualizarPerfilRepartidor(correo,contrasena, nit, telefono, mun, lugar, tra
         WHERE R.USUARIO =%s;""",(correo,contrasena, nit, telefono, mun, lugar, transporte, licencia, documento,usuario))
         conexion.commit()
         conexion.close()
+
+#Controlador para ver todos los pedidos entregados por el repartidor con sesion activa
+def VerPedidosEntregadosRepartidor(usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT O.ORD_ID, C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.FECHA, O.METODO_PAGO, O.ESTADO FROM ORDEN O
+        INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
+        INNER JOIN DIRECCION D on C.DIRECCION_DIR_ID = D.DIR_ID
+        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
+        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        WHERE R.USUARIO = %s AND O.ESTADO = 'ENTREGADO';""", (usuario,))
+        pedidos = cursor.fetchall()
+        lista_pedidos = []
+        for pedido in pedidos:
+            new_pedido = {"ORD_ID":pedido[0],"NOMBRE_CLIENTE":pedido[1], "APELLIDO_CLIENTE":pedido[2], "DEPARTAMENTO":pedido[3], "MUNICIPIO":pedido[4],"LUGAR":pedido[5], "FECHA":pedido[6], "METODO_PAGO":pedido[7],"ESTADO":pedido[8]}
+            lista_pedidos.append(new_pedido)
+        conexion.close()
+        return lista_pedidos
+        

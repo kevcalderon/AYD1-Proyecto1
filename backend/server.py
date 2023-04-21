@@ -679,6 +679,19 @@ def ActualizarPerfilRepartidor(usuario):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al modificar los datos del repartidor logueado: " + str(e)})
 
+
+
+#Endpoint para ver todos los pedidos entregados por el repartidor
+@app.route('/VerPedidosEntregadosRepartidor/<usuario>', methods=['GET'])
+def VerPedidosEntregadosRepartidor(usuario):
+    try:
+        ordenes = controlador.VerPedidosEntregadosRepartidor(usuario)
+        return jsonify({"exito":True, "ordenes":ordenes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las ordenes del cliente: " + str(e)})
+
+
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
