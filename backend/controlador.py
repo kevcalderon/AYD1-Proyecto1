@@ -656,7 +656,7 @@ def VerPedidoAsignadoRepartidor(nombre):
     with conexion.cursor() as cursor:
         id_usuario = VerIdRepartidorLog(nombre)
         id_ord = VerIdOrdenAsignadaRepartidor(id_usuario)
-        cursor.execute("""SELECT C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO FROM ORDEN O
+        cursor.execute("""SELECT O.ORD_ID, C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO FROM ORDEN O
         INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
         INNER JOIN DIRECCION D on O.DIRECCION_DIR_ID = D.DIR_ID
         INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
@@ -677,7 +677,7 @@ def VerPedidoAsignadoRepartidor(nombre):
             elif producto[1] != None:
                 new_prod = {"PRODUCTO":producto[1], "CANTIDAD":producto[2]}
                 lista_p.append(new_prod)
-        asignado = {"CLIENTE":pedido[0]+" "+pedido[1], "DEPARTAMENTO":pedido[2], "MUNICIPIO":pedido[3], "LUGAR":pedido[4], "METODO_PAGO":pedido[5], "ESTADO":pedido[6], "PRODUCTOS":lista_p}
+        asignado = {"ORD_ID":pedido[0],"CLIENTE":pedido[1]+" "+pedido[2], "DEPARTAMENTO":pedido[3], "MUNICIPIO":pedido[4], "LUGAR":pedido[5], "METODO_PAGO":pedido[6], "ESTADO":pedido[7], "PRODUCTOS":lista_p}
         return asignado
     
 #Controlador para cambiar el estado del producto asignado
@@ -685,5 +685,16 @@ def AsignarPedidoRepartidor(id_ord, usuario_rep):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("CALL AsignarPedidoRepartidor(%s,%s)", (id_ord, usuario_rep))
+        conexion.commit()
+        conexion.close()
+
+#Controlador para cambiar el estado del pedido a "entregado" 
+def EntregarPedidoRepartidor(ord_id, usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE ORDEN O
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        SET O.ESTADO = 'ENTREGADO'
+        WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID=%s AND R.USUARIO = %s;""", (ord_id, usuario))
         conexion.commit()
         conexion.close()
