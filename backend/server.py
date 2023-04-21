@@ -91,6 +91,15 @@ def MostrarProductosEmpresaTipoProducto(id_empresa, id_tipo_producto):
     except Exception as e:
         return jsonify({'respuesta': "Error al obtener los productos de la empresa: " + str(e)})
 
+#Endpoint para mostrar todas las ordenes existentes con su respectivo detalle
+@app.route('/mostrarOrdenes/<id_empresa>', methods=['GET'])
+def MostrarOrdenes(id_empresa):
+    try:
+        respuesta = controlador.MostrarOrdenes(id_empresa)
+        return jsonify({"exito":True, "msg":respuesta})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostrar la informacion: " + str(e)})
+
 # Endpoint para almacenar una empresa en la base de datos
 @app.route('/crearEmpresa', methods=['POST'])
 def CrearEmpresa():
@@ -149,11 +158,11 @@ def inicioSesionAdmin(USER, CONTRA):
 
 #Endpoint para comprobar si la contrasenia y usuario admin son correctos
 @app.route('/inicioSesionRepartidor/<USER>/<CONTRA>', methods=['GET'])
-def inicioSesionProveedor(USER, CONTRA):
+def inicioSesionRepartidor(USER, CONTRA):
     try:
-        proveedor=controlador.VerificarSesProveedor(USER, CONTRA)
-        if  proveedor != None:
-            return jsonify({'exito':True, "respuesta":proveedor})
+        usuario=controlador.VerificarSesRepartidor(USER, CONTRA)
+        if  usuario != None:
+            return jsonify({'exito':True, "respuesta":{'USUARIO': usuario[0]}})
         else:
             return jsonify({'exito':False, "msg": "Error credenciales incorrectas"})
 
@@ -362,6 +371,19 @@ def ActualizarProducto(id_producto):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar el producto: " + str(e)})
 
+# Endpoint para actualizar el estado de un detalle orden
+@app.route('/actualizarEstadoDetalleOrden', methods=["PUT"])
+def ActualizarEstadoDetalleOrden():
+    try:
+        id_orden = request.form['id_orden']
+        id_combo = request.form['id_combo']
+        id_producto = request.form['id_producto']
+        estado = request.form['estado'] # Este puede ser 'ACEPTADO' o 'RECHAZADO'
+        controlador.ActualizarEstadoDetalleOrden(id_orden, id_combo, id_producto, estado)
+        return jsonify({"exito":True, "msg":"Transaccion realizada correctamente."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al realizar la transaccion: " + str(e)})
+
 # Endpoint para descargar un archivo que este unicamente en la carpeta public
 @app.route('/descargarArchivo/<nombre_archivo>', methods=['GET'])
 def DescargarArchivo (nombre_archivo):
@@ -528,6 +550,46 @@ def VerPedidosPendientesRepartidor():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los pedidos pendientes de asignacion de repartidor: " + str(e)})   
 
+# Endpoint para ver el pedido el asignado del repartidor
+@app.route('/VerPedidoAsignadoRepartidor/<nombre>', methods=['GET'])
+def VerPedidoAsignadoRepartidor(nombre):
+    try:
+        pedidos = controlador.VerPedidoAsignadoRepartidor(nombre)
+        return jsonify({"exito":True, "pedidos":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar el pedido asignado del repartidor: " + str(e)})   
+
+# Endpoint para cambiar el estado del pedido a "EN PROCESO" cuando un repartidor se lo asigna
+@app.route('/AsignarPedidoRepartidor', methods=['PUT'])
+def AsignarPedidoRepartidor():
+    try:
+        pet = request.json
+        id_ord = pet[0]
+        user_rep = pet[1]
+        controlador.AsignarPedidoRepartidor(id_ord, user_rep)
+        return jsonify({"exito":True, "msj":"Pedido asignado exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al asignar el pedido al repartidor: " + str(e)}) 
+
+# Endpoint para cambiear el estado del pedido a "ENTREGADO" cuando el repartidor lo entrega
+@app.route('/EntregarPedidoRepartidor', methods=['PUT'])
+def EntregarPedidoRepartidor():
+    try:
+        resp = request.json
+        ord_id = resp[0]
+        usuario = resp[1]
+        controlador.EntregarPedidoRepartidor(ord_id, usuario)
+        return jsonify({"exito":True, "msj":"Pedido entregado exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al marcar el pedido como 'ENTREGADO': " + str(e)}) 
+
+@app.route('/VerTiposProductos', methods=['GET'])
+def VerTiposProduct():
+    try:
+        tipos = controlador.VerTiposProductos()
+        return jsonify({"exito":True, "tipos":tipos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los tipos de productos: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
