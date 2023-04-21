@@ -371,6 +371,19 @@ def ActualizarProducto(id_producto):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar el producto: " + str(e)})
 
+# Endpoint para actualizar el estado de un detalle orden
+@app.route('/actualizarEstadoDetalleOrden', methods=["PUT"])
+def ActualizarEstadoDetalleOrden():
+    try:
+        id_orden = request.form['id_orden']
+        id_combo = request.form['id_combo']
+        id_producto = request.form['id_producto']
+        estado = request.form['estado'] # Este puede ser 'ACEPTADO' o 'RECHAZADO'
+        controlador.ActualizarEstadoDetalleOrden(id_orden, id_combo, id_producto, estado)
+        return jsonify({"exito":True, "msg":"Transaccion realizada correctamente."})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al realizar la transaccion: " + str(e)})
+
 # Endpoint para descargar un archivo que este unicamente en la carpeta public
 @app.route('/descargarArchivo/<nombre_archivo>', methods=['GET'])
 def DescargarArchivo (nombre_archivo):

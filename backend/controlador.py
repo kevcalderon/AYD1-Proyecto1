@@ -415,6 +415,21 @@ def ActualizarProducto(id_producto, id_tipo_producto, nombre, descripcion, preci
     conexion.commit()
     conexion.close()
 
+# Controlador para actualizar un estado de un detalle orden
+def ActualizarEstadoDetalleOrden(id_orden, id_combo, id_producto, estado):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        if id_combo == "" and id_producto != "":
+            cursor.execute("""UPDATE DETALLE_ORDEN 
+            SET ESTADO = %s WHERE ORDEN_ORD_ID = %s AND PRODUCTO_PRO_ID = %s AND COMBO_COM_ID IS NULL""",
+            (estado, id_orden, id_producto))
+        elif id_combo != "" and id_producto == "":
+            cursor.execute("""UPDATE DETALLE_ORDEN 
+            SET ESTADO = %s WHERE ORDEN_ORD_ID = %s AND PRODUCTO_PRO_ID IS NULL AND COMBO_COM_ID = %s""",
+            (estado, id_orden, id_combo))
+        cursor.execute("""call ActualizarEstadoOrden(%s)""",(id_orden,))
+    conexion.commit()
+    conexion.close()
 
 def UltimaEmpresa():
     conexion = obtener_conexion()
