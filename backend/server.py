@@ -591,6 +591,16 @@ def VerTiposProduct():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los tipos de productos: " + str(e)})
 
+
+@app.route('/VerEmpresasPorTipo/<tipo>', methods=['GET'])
+def VerEmpresasPorTip(tipo):
+    try:
+        empresas = controlador.VerEmpresasPorTipo(tipo)
+        print(empresas)
+        return jsonify({"exito":True, "empresas":empresas})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las empresas por tipo: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 

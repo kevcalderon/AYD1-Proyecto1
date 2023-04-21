@@ -710,3 +710,16 @@ def VerTiposProductos():
             lista_tipos.append(new_tipo)
         conexion.close()
         return lista_tipos
+    
+def VerEmpresasPorTipo(tipo):
+    print(tipo)
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT * FROM EMPRESA WHERE TIPO_EMPRESA_T_EMP_ID = "+str(tipo))
+        empresas = cursor.fetchall()
+        lista_empresas = []
+        for empresa in empresas:
+            new_empresa = {"EMP_ID":empresa[0],"DIR_ID":empresa[1], "T_EMP_ID":empresa[2], "NOMBRE":empresa[3], "DESCRIPCION":empresa[4], "CORREO":empresa[5], "TELEFONO":empresa[6], "USUARIO":empresa[7], "CONTRASENA":empresa[8], "NIT":empresa[9], "ESTADO":empresa[10], "DOCUMENTO":empresa[11]}
+            lista_empresas.append(new_empresa)
+        conexion.close()
+        return lista_empresas
