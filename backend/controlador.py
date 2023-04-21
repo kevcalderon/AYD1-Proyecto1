@@ -712,7 +712,6 @@ def VerTiposProductos():
         return lista_tipos
     
 def VerEmpresasPorTipo(tipo):
-    print(tipo)
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("SELECT * FROM EMPRESA WHERE TIPO_EMPRESA_T_EMP_ID = "+str(tipo))
@@ -723,3 +722,34 @@ def VerEmpresasPorTipo(tipo):
             lista_empresas.append(new_empresa)
         conexion.close()
         return lista_empresas
+
+def VerCombosPorProducto(producto_id):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        sql = """SELECT c.COM_ID, c.NOMBRE, c.DESCRIPCION, c.PRECIO, c.FOTOGRAFIA, dc.CANTIDAD, dc.OBSERVACIONES, p.PRO_ID, p.NOMBRE
+                 FROM COMBO c
+                 JOIN DETALLE_COMBO dc ON c.COM_ID = dc.COMBO_COM_ID
+                 JOIN PRODUCTO p ON dc.PRODUCTO_PRO_ID = p.PRO_ID
+                 WHERE p.PRO_ID = %s"""
+        cursor.execute(sql, (producto_id,))
+        combos = cursor.fetchall()
+        lista_combos = []
+        combo_temp = {}
+        for combo in combos:
+            if combo_temp.get('ID_COMBO') != combo[0]:
+                if combo_temp:
+                    lista_combos.append(combo_temp)
+                combo_temp = {"ID_COMBO": combo[0],
+                              "NOMBRE": combo[1],
+                              "DESCRIPCION": combo[2],
+                              "PRECIO": combo[3],
+                              "FOTOGRAFIA": combo[4],
+                              "DETALLE_COMBO": []}
+            detalle_temp = {"id_producto": combo[7],
+                            "nombre": combo[8],
+                            "cantidad": combo[5],
+                            "observaciones": combo[6]}
+            combo_temp["DETALLE_COMBO"].append(detalle_temp)
+        lista_combos.append(combo_temp)
+        conexion.close()
+        return lista_combos
