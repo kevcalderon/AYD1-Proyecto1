@@ -808,3 +808,14 @@ def VerComisionRepartidor(usuario, mes):
         valor = cursor.fetchone()[0]
         conexion.close()
         return valor
+
+#Controlador para ver las ordenes de un cliente
+def VerOrdenesCliente(usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""select ORD_ID, ORDEN.DIRECCION_DIR_ID, DIRECCION.LUGAR AS LUGAR_DIRECCION, REPARTIDOR_REP_ID, REPARTIDOR.NOMBRE, REPARTIDOR.APELLIDO ,FECHA, ORDEN.ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO  
+from ((ORDEN INNER JOIN DIRECCION ON DIRECCION.DIR_ID = ORDEN.DIRECCION_DIR_ID)INNER JOIN REPARTIDOR ON REPARTIDOR.REP_ID = ORDEN.REPARTIDOR_REP_ID)
+WHERE ORDEN.CLIENTE_CLI_ID = %s;""",(usuario,))
+        ordeneslist = cursor.fetchall()
+        lista_ordenes = [{"ORD_ID":ordenes[0], "DIRECCION_DIR_ID":ordenes[1], "LUGAR_DIRECCION":ordenes[2], "REPARTIDOR_REP_ID":ordenes[3], "NOMBRE_REPARTIDOR":ordenes[4], "APELLIDO_REPARTIDOR":ordenes[5], "FECHA":ordenes[6], "ESTADO":ordenes[7], "CALIFICACION":ordenes[8], "COMENTARIO":ordenes[9], "METODO_PAGO":ordenes[10]} for ordenes in ordeneslist]
+        return lista_ordenes

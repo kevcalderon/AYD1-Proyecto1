@@ -630,6 +630,14 @@ def VerPerfilRepartidor(usuario):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los datos del repartidor logueado: " + str(e)})
 
+#Endpoint para ver toda las ordenes de un cliente
+@app.route('/VerOrdenesCliente/<id_cliente>', methods=['GET'])
+def VerOrdenesClient(id_cliente):
+    try:
+        ordenes = controlador.VerOrdenesCliente(id_cliente)
+        return jsonify({"exito":True, "ordenes":ordenes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las ordenes del cliente: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
