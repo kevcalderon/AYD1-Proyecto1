@@ -651,6 +651,33 @@ def ActualizarComentarioCalificacionOrden():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar el comentario y la calificacion: " + str(e)})
 
+#Endpoint para modificar los datos del repartidor logueado
+@app.route('/ActualizarPerfilRepartidor/<usuario>', methods=['PUT'])
+def ActualizarPerfilRepartidor(usuario):
+    try:
+        data = request.json
+        correo = data[0]
+        contrasena = data[1]
+        nit = data[2]
+        telefono = data[3]
+        municipio = data[4]
+        lugar = data[5]
+        transporte = data[6]
+        licencia = data[7]
+        nombre_archivo = None
+        if('documento' in request.files):
+            documento = request.files['documento']
+            filename = secure_filename(documento.filename)
+            if(not archivo_permitido(filename)):
+                return jsonify({"exito":False, "msg":"La extensión del archivo no esta permitido"})
+            hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") # Obtiene la hora actual como una cadena en el formato "YYYY-MM-DD-HH-MM-SS"
+            nombre_archivo = hora_actual + '_' + filename # Concatena la hora actual y el nombre de archivo original
+            documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
+
+        controlador.ActualizarPerfilRepartidor(correo, contrasena, nit, telefono, municipio, lugar, transporte, licencia, nombre_archivo)
+        return jsonify({'exito':True, "msj": "Se actualizo correctamente el perfil del repartidor"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al modificar los datos del repartidor logueado: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")

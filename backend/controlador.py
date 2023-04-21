@@ -828,3 +828,22 @@ def ActualizarOrden(id_orden, comentario, calificacion):
         conexion.commit()
         conexion.close()
         return True
+    
+    #Controlador para actualizar los datos del repartidor
+def ActualizarPerfilRepartidor(correo,contrasena, nit, telefono, mun, lugar, transporte, licencia, documento,usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE REPARTIDOR R
+        INNER JOIN DIRECCION D on R.DIRECCION_DIR_ID = D.DIR_ID
+        SET R.CORREO = %s,
+        R.CONTRASENA = %s,
+        R.NIT = %s,
+        R.TELEFONO = %s,
+        D.MUNICIPIO_MUN_ID = %s,
+        D.LUGAR = %s,
+        R.TRANSPORTE = %s,
+        R.LICENCIA =%s,
+        R.DOCUMENTO = %s
+        WHERE R.USUARIO =%s;""",(correo,contrasena, nit, telefono, mun, lugar, transporte, licencia, documento,usuario))
+        conexion.commit()
+        conexion.close()
