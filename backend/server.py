@@ -609,6 +609,15 @@ def VerCombosPorProduct(id_producto):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los combos por producto: " + str(e)})
 
+#Endpoint para ver los combos por el tipo de producto
+@app.route('/VerCombosPorTipoProducto/<tipo>', methods=['GET'])
+def VerCombosPorTipoProduct(tipo):
+    try:
+        combos = controlador.VerCombosPorTipo(tipo)
+        return jsonify({"exito":True, "combos":combos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los combos por tipo de producto: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 

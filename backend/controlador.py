@@ -753,3 +753,19 @@ def VerCombosPorProducto(producto_id):
         lista_combos.append(combo_temp)
         conexion.close()
         return lista_combos
+
+#Controlador para ver los combos por el tipo del producto
+def VerCombosPorTipo(tipo):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        sql = """SELECT DISTINCT c.COM_ID, c.NOMBRE, c.DESCRIPCION, c.PRECIO, c.FOTOGRAFIA
+                 FROM COMBO c
+                 JOIN DETALLE_COMBO dc ON c.COM_ID = dc.COMBO_COM_ID
+                 JOIN PRODUCTO p ON dc.PRODUCTO_PRO_ID = p.PRO_ID
+                 JOIN TIPO_PRODUCTO tp ON p.TIPO_PRODUCTO_T_PRO_ID = tp.T_PRO_ID
+                 WHERE tp.T_PRO_ID = %s"""
+        cursor.execute(sql, (tipo,))
+        combos = cursor.fetchall()
+        lista_combos = [{"COM_ID": combo[0], "NOMBRE": combo[1], "DESCRIPCION": combo[2], "PRECIO": combo[3], "FOTOGRAFIA": combo[4]} for combo in combos]        
+        conexion.close()
+        return lista_combos
