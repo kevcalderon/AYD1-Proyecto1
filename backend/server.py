@@ -700,6 +700,17 @@ def VerPedidosEntregadosRepartidor(usuario):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar las ordenes del cliente: " + str(e)})
 
+@app.route('/ActualizarComentarioCalificacion', methods=['POST'])
+def ActualizarComentarioCalificacio():
+    try:
+        data = request.json
+        id_orden = data['id_orden']
+        comentario = data['comentario']
+        calificacion = data['calificacion']
+        controlador.ActualizarComentarioCalificacion(id_orden, comentario, calificacion)
+        return jsonify({"exito":True, "msj":"Comentario y calificacion actualizados exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al actualizar el comentario y la calificacion: " + str(e)})
 
 
 if __name__ == '__main__':

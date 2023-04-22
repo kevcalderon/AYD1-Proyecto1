@@ -887,4 +887,10 @@ def VerPedidosEntregadosRepartidor(usuario):
             lista_pedidos.append(new_pedido)
         conexion.close()
         return lista_pedidos
-        
+
+def ActualizarComentarioCalificacion(id_orden, comentario, calificacion):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE ORDEN SET COMENTARIO = %s, CALIFICACION = %s WHERE ORD_ID = %s;""",(comentario, calificacion, id_orden))
+        conexion.commit()
+        conexion.close() 
