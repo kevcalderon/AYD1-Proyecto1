@@ -61,15 +61,7 @@ function Registro() {
     });
   };
 
-
-  function mostrarComponente(msgAlert) {
-    setMostrarAlert(true);
-    setMsg(msgAlert);
-    setTimeout(() => setMostrarAlert(false), 5000);
-  }
-
-
-  const getDepartamentos = async () => {
+   const getDepartamentos = async () => {
     await fetch(`${API_URL}/mostrarDepartamentos`)
       .then((response) => response.json())
       .then((res) => {

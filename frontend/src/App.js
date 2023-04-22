@@ -70,7 +70,7 @@ function App() {
         <Route path={"/MisPedidos"} element={<MisPedidos />} />
         <Route path={"/Carrito"} element={<Carrito />} />
         <Route path={"/Empresas"} element={<Empresas />} />
-        <Route path={"/ProductosC"} element={<ProductosC />} />
+        <Route path={"/ProductosC/:id"} element={<ProductosC />} />
         
         {/*REPARTIDOR*/}
         <Route path={"/MiPedido"} element={<MiPedido />} />
