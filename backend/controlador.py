@@ -515,27 +515,45 @@ def ConfirmarOrdenCarrito(id_cliente):
 def AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones, estado):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("INSERT INTO DETALLE_ORDEN (COMBO_COM_ID, ORDEN_ORD_ID, CANTIDAD, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES,ESTADO)" + 
-                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(cantidad) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + "PENDIENTE" + "');")
+        cursor.execute("INSERT INTO DETALLE_ORDEN (COMBO_COM_ID, ORDEN_ORD_ID, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES,ESTADO)" + 
+                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + "pendiente" + "');")
     conexion.commit()
     conexion.close()
 
 
-def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
+def CrearDireccion(id_municipio, lugar):
+    conexion = obtener_conexion()
+    id_direccion = None
+    with conexion.cursor() as cursor:
+        cursor.execute("INSERT INTO DIRECCION (MUNICIPIO_MUN_ID, LUGAR)" + 
+                       "VALUES (" + str(id_municipio) + ",'" + lugar + "');")
+        cursor.execute("SELECT LAST_INSERT_ID();")
+        id_direccion = cursor.fetchone()[0]
+    conexion.commit()
+    conexion.close()
+    return id_direccion
+
+def ActualizarTarjeta(id_cliente, tarjeta):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("UPDATE CLIENTE SET TARJETA = %s WHERE CLI_ID = %s;", (tarjeta, id_cliente))
+    conexion.commit()
+    conexion.close()
+
+
+def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor,fecha, calificacion, comentario, metodo_pago):
     conexion = obtener_conexion()
     id_orden = None
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
-        id_orden = cursor.fetchone()[0]
-    if id_orden is None:
-        with conexion.cursor() as cursor:
-            cursor.execute("INSERT INTO ORDEN (CLIENTE_CLI_ID, DIRECCION_DIR_ID, REPARTIDOR_REP_ID, FECHA, ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO)" + 
-                       "VALUES (" + str(id_cliente) + "," + str(id_direccion) + "," + str(id_repartidor) + ",'" + fecha + "','" + "PENDIENTE" + "'," + str(calificacion) + ",'" + comentario + "','" + metodo_pago + "');")
+        cursor.execute("INSERT INTO ORDEN (CLIENTE_CLI_ID, DIRECCION_DIR_ID, REPARTIDOR_REP_ID, FECHA, ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO)" +
+        "VALUES (" + str(id_cliente) + "," + str(id_direccion) + ",NULL , NOW(),'" + "pendiente" + "','" + str(calificacion) + "','" + comentario + "','" + metodo_pago + "');")
         cursor.execute("SELECT LAST_INSERT_ID();")
         id_orden = cursor.fetchone()[0]
     conexion.commit()
     conexion.close()
     return id_orden
+
+
 
 def MostrarCarrito(id_cliente):
     conexion = obtener_conexion()
