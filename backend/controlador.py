@@ -827,15 +827,18 @@ def VerComisionRepartidor(usuario, mes):
         conexion.close()
         return valor
 
-#Controlador para ver las ordenes de un cliente
-def VerOrdenesCliente(usuario):
+def VerOrdenesCliente(id_cliente):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""select ORD_ID, ORDEN.DIRECCION_DIR_ID, DIRECCION.LUGAR AS LUGAR_DIRECCION, REPARTIDOR_REP_ID, REPARTIDOR.NOMBRE, REPARTIDOR.APELLIDO ,FECHA, ORDEN.ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO  
-from ((ORDEN INNER JOIN DIRECCION ON DIRECCION.DIR_ID = ORDEN.DIRECCION_DIR_ID)INNER JOIN REPARTIDOR ON REPARTIDOR.REP_ID = ORDEN.REPARTIDOR_REP_ID)
-WHERE ORDEN.CLIENTE_CLI_ID = %s;""",(usuario,))
-        ordeneslist = cursor.fetchall()
-        lista_ordenes = [{"ORD_ID":ordenes[0], "DIRECCION_DIR_ID":ordenes[1], "LUGAR_DIRECCION":ordenes[2], "REPARTIDOR_REP_ID":ordenes[3], "NOMBRE_REPARTIDOR":ordenes[4], "APELLIDO_REPARTIDOR":ordenes[5], "FECHA":ordenes[6], "ESTADO":ordenes[7], "CALIFICACION":ordenes[8], "COMENTARIO":ordenes[9], "METODO_PAGO":ordenes[10]} for ordenes in ordeneslist]
+        cursor.execute("""SELECT O.ORD_ID, O.FECHA, O.ESTADO, O.METODO_PAGO, O.CALIFICACION, O.COMENTARIO, O.CLIENTE_CLI_ID, R.NOMBRE AS NOMBRE_REPARTIDOR, D.LUGAR
+                        FROM ORDEN O
+                        INNER JOIN CLIENTE C ON O.CLIENTE_CLI_ID = C.CLI_ID
+                        INNER JOIN REPARTIDOR R ON O.REPARTIDOR_REP_ID = R.REP_ID
+                        INNER JOIN DIRECCION D ON O.DIRECCION_DIR_ID = D.DIR_ID
+                        WHERE C.CLI_ID =  %s;""",(id_cliente,))
+        ordenes = cursor.fetchall()
+        lista_ordenes = [{"ORD_ID": orden[0], "FECHA": orden[1], "ESTADO": orden[2], "METODO_PAGO": orden[3], "CALIFICACION": orden[4], "COMENTARIO": orden[5], "CLIENTE_CLI_ID": orden[6], "NOMBRE_REPARTIDOR": orden[7]} for orden in ordenes]
+        conexion.close()
         return lista_ordenes
     
 #Controlador para actualizar el comentario y la calificacion de una orden
