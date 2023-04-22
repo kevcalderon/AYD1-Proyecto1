@@ -837,7 +837,7 @@ def VerOrdenesCliente(id_cliente):
                         INNER JOIN DIRECCION D ON O.DIRECCION_DIR_ID = D.DIR_ID
                         WHERE C.CLI_ID =  %s;""",(id_cliente,))
         ordenes = cursor.fetchall()
-        lista_ordenes = [{"ORD_ID": orden[0], "FECHA": orden[1], "ESTADO": orden[2], "METODO_PAGO": orden[3], "CALIFICACION": orden[4], "COMENTARIO": orden[5], "CLIENTE_CLI_ID": orden[6], "NOMBRE_REPARTIDOR": orden[7]} for orden in ordenes]
+        lista_ordenes = [{"ORD_ID": orden[0], "FECHA": orden[1], "ESTADO": orden[2], "METODO_PAGO": orden[3], "CALIFICACION": orden[4], "COMENTARIO": orden[5], "CLIENTE_CLI_ID": orden[6], "NOMBRE_REPARTIDOR": orden[7], "LUGAR": orden[8]} for orden in ordenes]
         conexion.close()
         return lista_ordenes
     
