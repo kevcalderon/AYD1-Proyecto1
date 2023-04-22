@@ -711,6 +711,16 @@ def ActualizarComentarioCalificacio():
         return jsonify({"exito":True, "msj":"Comentario y calificacion actualizados exitosamente"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar el comentario y la calificacion: " + str(e)})
+    
+
+#Endpoint para crear una solicitud de cambio de zona de repartidor
+@app.route('/SolicitudActualizarDireccionRepartidor/<id_rep>', methods=['POST'])
+def SolicitudActualizarDireccionRepartidor(id_rep):
+    try:
+        controlador.AgregarSolicitud(None, id_rep, "ACTUALIZACION", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de cambio de direccion del repartidor", "PENDIENTE")
+        return jsonify({"exito":True, "msj":"Solicitud de cambio de direccion de repartidor, creada exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al actualizar la direccion del repartidor: " + str(e)})
 
 
 if __name__ == '__main__':
