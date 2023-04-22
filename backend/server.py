@@ -454,25 +454,36 @@ def ConfirmarOrden(id_cliente):
         return jsonify({'exito':False, "msg": "Error al confirmar la orden: " + str(e)})
 
 @app.route('/AgregarProductoCarrito', methods=['POST'])
-def AgregarProductoCarrito():
+def AgregarProductoCarrit():
     try:
-        id_cliente = request.form['id_cliente']
-        id_direccion = request.form['id_direccion']
-        id_repartidor = request.form['id_repartidor']
-        fecha = request.form['fecha']
-        calificacion = request.form['calificacion']
-        comentario = request.form['comentario']
-        metodo_pago = request.form['metodo_pago']
-        id_combo = request.form['id_combo']
-        cantidad = request.form['cantidad']
-        id_producto = request.form['id_producto']
-        observaciones = request.form['observaciones']
-        estado = request.form['estado']
-        id_orden = controlador.AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago)
-        controlador.AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones, estado)
-        return jsonify({"exito":True, "msg":"Se ha agregado el producto al carrito correctamente."})
+        id_combo = None
+        id_producto = None
+        info = request.get_json()
+        datos_entrega = info['datosEntrega']
+        municipio = datos_entrega['municipio']
+        lugar = datos_entrega['lugar']
+        tipoPago = datos_entrega['tipoPago']
+        numeroTarjeta = datos_entrega['numeroTarjeta']
+        id_direccion = controlador.CrearDireccion(municipio, lugar)
+        fecha = info['fecha']
+        id_cliente = info['idcliente']
+        id_orden = controlador.AgregarProductoCarrito(id_cliente, id_direccion, "", fecha, "" ,"",tipoPago)
+        for producto in info['productos']:
+            if 'idcombo' in producto and producto['idcombo'] is not None:
+                id_combo = producto['idcombo']
+            else:
+                id_combo = "NULL"
+            if 'idproducto' in producto and producto['idproducto'] is not None:
+                id_producto = producto['idproducto']
+            else:
+                id_producto = "NULL"
+            cantidad = producto['cantidad']
+            observacion = producto['observacion']
+            controlador.AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observacion, "pendiente")
+
+        return jsonify({"exito":True, "msg":"Se han agregado los productos al carrito correctamente."})
     except Exception as e:
-        return jsonify({'exito':False, "msg": "Error al agregar el producto al carrito: " + str(e)})
+        return jsonify({'exito':False, "msg": "Error: " + str(e)})
 
 #Endpoint para mostrar el carrito de un cliente
 @app.route('/mostrarCarritoProductos/<id_cliente>', methods=['GET'])
@@ -650,6 +661,46 @@ def ActualizarComentarioCalificacionOrden():
         return jsonify({"exito":True, "msj":"Comentario y calificacion actualizados exitosamente"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar el comentario y la calificacion: " + str(e)})
+
+#Endpoint para modificar los datos del repartidor logueado
+@app.route('/ActualizarPerfilRepartidor/<usuario>', methods=['PUT'])
+def ActualizarPerfilRepartidor(usuario):
+    try:
+        data = request.json
+        correo = data[0]
+        contrasena = data[1]
+        nit = data[2]
+        telefono = data[3]
+        municipio = data[4]
+        lugar = data[5]
+        transporte = data[6]
+        licencia = data[7]
+        nombre_archivo = None
+        if('documento' in request.files):
+            documento = request.files['documento']
+            filename = secure_filename(documento.filename)
+            if(not archivo_permitido(filename)):
+                return jsonify({"exito":False, "msg":"La extensión del archivo no esta permitido"})
+            hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") # Obtiene la hora actual como una cadena en el formato "YYYY-MM-DD-HH-MM-SS"
+            nombre_archivo = hora_actual + '_' + filename # Concatena la hora actual y el nombre de archivo original
+            documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
+
+        controlador.ActualizarPerfilRepartidor(correo, contrasena, nit, telefono, municipio, lugar, transporte, licencia, nombre_archivo)
+        return jsonify({'exito':True, "msj": "Se actualizo correctamente el perfil del repartidor"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al modificar los datos del repartidor logueado: " + str(e)})
+
+
+
+#Endpoint para ver todos los pedidos entregados por el repartidor
+@app.route('/VerPedidosEntregadosRepartidor/<usuario>', methods=['GET'])
+def VerPedidosEntregadosRepartidor(usuario):
+    try:
+        ordenes = controlador.VerPedidosEntregadosRepartidor(usuario)
+        return jsonify({"exito":True, "ordenes":ordenes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las ordenes del cliente: " + str(e)})
+
 
 
 if __name__ == '__main__':

@@ -515,27 +515,45 @@ def ConfirmarOrdenCarrito(id_cliente):
 def AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones, estado):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("INSERT INTO DETALLE_ORDEN (COMBO_COM_ID, ORDEN_ORD_ID, CANTIDAD, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES,ESTADO)" + 
-                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(cantidad) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + "PENDIENTE" + "');")
+        cursor.execute("INSERT INTO DETALLE_ORDEN (COMBO_COM_ID, ORDEN_ORD_ID, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES,ESTADO)" + 
+                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + "pendiente" + "');")
     conexion.commit()
     conexion.close()
 
 
-def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor, fecha, calificacion, comentario, metodo_pago):
+def CrearDireccion(id_municipio, lugar):
+    conexion = obtener_conexion()
+    id_direccion = None
+    with conexion.cursor() as cursor:
+        cursor.execute("INSERT INTO DIRECCION (MUNICIPIO_MUN_ID, LUGAR)" + 
+                       "VALUES (" + str(id_municipio) + ",'" + lugar + "');")
+        cursor.execute("SELECT LAST_INSERT_ID();")
+        id_direccion = cursor.fetchone()[0]
+    conexion.commit()
+    conexion.close()
+    return id_direccion
+
+def ActualizarTarjeta(id_cliente, tarjeta):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("UPDATE CLIENTE SET TARJETA = %s WHERE CLI_ID = %s;", (tarjeta, id_cliente))
+    conexion.commit()
+    conexion.close()
+
+
+def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor,fecha, calificacion, comentario, metodo_pago):
     conexion = obtener_conexion()
     id_orden = None
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE CLIENTE_CLI_ID = " + str(id_cliente) + " AND ESTADO = 'PENDIENTE';")
-        id_orden = cursor.fetchone()[0]
-    if id_orden is None:
-        with conexion.cursor() as cursor:
-            cursor.execute("INSERT INTO ORDEN (CLIENTE_CLI_ID, DIRECCION_DIR_ID, REPARTIDOR_REP_ID, FECHA, ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO)" + 
-                       "VALUES (" + str(id_cliente) + "," + str(id_direccion) + "," + str(id_repartidor) + ",'" + fecha + "','" + "PENDIENTE" + "'," + str(calificacion) + ",'" + comentario + "','" + metodo_pago + "');")
+        cursor.execute("INSERT INTO ORDEN (CLIENTE_CLI_ID, DIRECCION_DIR_ID, REPARTIDOR_REP_ID, FECHA, ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO)" +
+        "VALUES (" + str(id_cliente) + "," + str(id_direccion) + ",NULL , NOW(),'" + "pendiente" + "','" + str(calificacion) + "','" + comentario + "','" + metodo_pago + "');")
         cursor.execute("SELECT LAST_INSERT_ID();")
         id_orden = cursor.fetchone()[0]
     conexion.commit()
     conexion.close()
     return id_orden
+
+
 
 def MostrarCarrito(id_cliente):
     conexion = obtener_conexion()
@@ -828,3 +846,42 @@ def ActualizarOrden(id_orden, comentario, calificacion):
         conexion.commit()
         conexion.close()
         return True
+    
+    #Controlador para actualizar los datos del repartidor
+def ActualizarPerfilRepartidor(correo,contrasena, nit, telefono, mun, lugar, transporte, licencia, documento,usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE REPARTIDOR R
+        INNER JOIN DIRECCION D on R.DIRECCION_DIR_ID = D.DIR_ID
+        SET R.CORREO = %s,
+        R.CONTRASENA = %s,
+        R.NIT = %s,
+        R.TELEFONO = %s,
+        D.MUNICIPIO_MUN_ID = %s,
+        D.LUGAR = %s,
+        R.TRANSPORTE = %s,
+        R.LICENCIA =%s,
+        R.DOCUMENTO = %s
+        WHERE R.USUARIO =%s;""",(correo,contrasena, nit, telefono, mun, lugar, transporte, licencia, documento,usuario))
+        conexion.commit()
+        conexion.close()
+
+#Controlador para ver todos los pedidos entregados por el repartidor con sesion activa
+def VerPedidosEntregadosRepartidor(usuario):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT O.ORD_ID, C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.FECHA, O.METODO_PAGO, O.ESTADO FROM ORDEN O
+        INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
+        INNER JOIN DIRECCION D on C.DIRECCION_DIR_ID = D.DIR_ID
+        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
+        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
+        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
+        WHERE R.USUARIO = %s AND O.ESTADO = 'ENTREGADO';""", (usuario,))
+        pedidos = cursor.fetchall()
+        lista_pedidos = []
+        for pedido in pedidos:
+            new_pedido = {"ORD_ID":pedido[0],"NOMBRE_CLIENTE":pedido[1], "APELLIDO_CLIENTE":pedido[2], "DEPARTAMENTO":pedido[3], "MUNICIPIO":pedido[4],"LUGAR":pedido[5], "FECHA":pedido[6], "METODO_PAGO":pedido[7],"ESTADO":pedido[8]}
+            lista_pedidos.append(new_pedido)
+        conexion.close()
+        return lista_pedidos
+        
