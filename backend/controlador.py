@@ -912,3 +912,11 @@ def DeshabilitarEmpresa(id_emp):
         cursor.execute("""UPDATE EMPRESA E SET E.ESTADO = 'RECHAZADO' WHERE E.EMP_ID = %s;""",(id_emp,))
         conexion.commit()
         conexion.close()
+
+#Controlador para deshabilitar un usuario de tipo cliente
+def DeshabilitarCliente(id_cli):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE CLIENTE C SET C.ESTADO = 'RECHAZADO' WHERE C.CLI_ID = %s;""",(id_cli,))
+        conexion.commit()
+        conexion.close()
