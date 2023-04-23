@@ -731,6 +731,15 @@ def DeshabilitarRepartidor(id_rep):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al deshabilitar al repartidor: " + str(e)})
 
+#Endpoint para deshabilitar una empresa
+@app.route('/DeshabilitarEmpresa/<id_emp>',methods=['PUT'])
+def DeshabilitarEmpresa(id_emp):
+    try:
+        controlador.DeshabilitarEmpresa(id_emp)
+        return jsonify({"exito":True, "msj":"Se ha deshabilitado la empresa exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al deshabilitar a la empresa: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 

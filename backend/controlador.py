@@ -904,3 +904,11 @@ def DeshabilitarRepartidor(id_rep):
         conexion.commit()
         conexion.close()
 
+
+#Controlador para deshabilitar un usuario de tipo empresa 
+def DeshabilitarEmpresa(id_emp):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE EMPRESA E SET E.ESTADO = 'RECHAZADO' WHERE E.EMP_ID = %s;""",(id_emp,))
+        conexion.commit()
+        conexion.close()
