@@ -894,3 +894,13 @@ def ActualizarComentarioCalificacion(id_orden, comentario, calificacion):
         cursor.execute("""UPDATE ORDEN SET COMENTARIO = %s, CALIFICACION = %s WHERE ORD_ID = %s;""",(comentario, calificacion, id_orden))
         conexion.commit()
         conexion.close() 
+
+
+#Controlador para deshabilitar un usuario de tipo repartidor
+def DeshabilitarRepartidor(id_rep):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""UPDATE REPARTIDOR R SET R.ESTADO = 'RECHAZADO' WHERE R.REP_ID = %s;""",(id_rep,))
+        conexion.commit()
+        conexion.close()
+
