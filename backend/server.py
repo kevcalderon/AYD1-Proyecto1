@@ -137,7 +137,7 @@ def CrearEmpresa():
             documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
 
         id_empresa = controlador.AgregarEmpresa(id_direccion, id_tipo_empresa, nombre, descripcion, correo, telefono, usuario, contrasenia, nit, nombre_archivo)
-        controlador.AgregarSolicitud(id_empresa, None, "empresa", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo empresa", "pendiente")
+        controlador.AgregarSolicitud(id_empresa, None, None, "REGISTRO", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo empresa", "PENDIENTE")
         return jsonify({"exito":True, "msg":"Se ha creado su usuario correctamente. Le pedimos que aguarde la confirmación de su cuenta"})
     except Exception as e:
         controlador.EliminarEmpresa(id_empresa)
@@ -238,8 +238,7 @@ def registrarRepartidor():
             nombre_archivo = hora_actual + '_' + filename 
             documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
         id_repartidor = controlador.RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit, id_dep, id_muni, lugar, licencia, transporte, nombre_archivo)
-        id_empresa = controlador.UltimaEmpresa()
-        controlador.AgregarSolicitud(id_empresa, id_repartidor, "repartidor", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo repartidor", "pendiente")
+        controlador.AgregarSolicitud(None, id_repartidor, None, "REGISTRO", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo repartidor", "PENDIENTE")
         return jsonify({
         "status": "success",
         "message": "Se ha registrado su usuario correctamente, espere a que sea aprobado por un administrador."
@@ -714,7 +713,12 @@ def ActualizarComentarioCalificacio():
 @app.route('/SolicitudActualizarDireccionRepartidor/<id_rep>', methods=['POST'])
 def SolicitudActualizarDireccionRepartidor(id_rep):
     try:
-        controlador.AgregarSolicitud(None, id_rep, "ACTUALIZACION", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de cambio de direccion del repartidor", "PENDIENTE")
+        data = request.json
+        id_mun = data[0]
+        lugar = data[1]
+        controlador.AgregarDireccion(id_mun, lugar)
+        dir_id = controlador.ObtenerDireccion(id_mun,lugar)
+        controlador.AgregarSolicitud(None, id_rep, dir_id, "ACTUALIZACION", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de cambio de direccion del repartidor", "PENDIENTE")
         return jsonify({"exito":True, "msj":"Solicitud de cambio de direccion de repartidor, creada exitosamente"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar la direccion del repartidor: " + str(e)})
