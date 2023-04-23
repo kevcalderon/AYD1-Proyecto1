@@ -722,6 +722,14 @@ def SolicitudActualizarDireccionRepartidor(id_rep):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar la direccion del repartidor: " + str(e)})
 
+#Endpoint para deshabilitar un repartidor
+@app.route('/DeshabilitarRepartidor/<id_rep>', methods=['PUT'])
+def DeshabilitarRepartidor(id_rep):
+    try:
+        controlador.DeshabilitarRepartidor(id_rep)
+        return jsonify({"exito":True, "msj":"Se ha deshabilitado el repartidor exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al deshabilitar al repartidor: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
