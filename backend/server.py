@@ -740,6 +740,16 @@ def DeshabilitarEmpresa(id_emp):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al deshabilitar a la empresa: " + str(e)})
 
+#Endpoint para deshabilitar un cliente
+@app.route('/DeshabilitarCliente/<id_cli>',methods=['PUT'])
+def DeshabilitarCliente(id_cli):
+    try:
+        controlador.DeshabilitarCliente(id_cli)
+        return jsonify({"exito":True, "msj":"Se ha deshabilitado el cliente exitosamente"})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al deshabilitar al cliente: " + str(e)}) 
+    
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
