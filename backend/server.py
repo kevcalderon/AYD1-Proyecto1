@@ -670,10 +670,8 @@ def ActualizarPerfilRepartidor(usuario):
         contrasena = data[1]
         nit = data[2]
         telefono = data[3]
-        municipio = data[4]
-        lugar = data[5]
-        transporte = data[6]
-        licencia = data[7]
+        transporte = data[4]
+        licencia = data[5]
         nombre_archivo = None
         if('documento' in request.files):
             documento = request.files['documento']
@@ -683,8 +681,7 @@ def ActualizarPerfilRepartidor(usuario):
             hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") # Obtiene la hora actual como una cadena en el formato "YYYY-MM-DD-HH-MM-SS"
             nombre_archivo = hora_actual + '_' + filename # Concatena la hora actual y el nombre de archivo original
             documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
-
-        controlador.ActualizarPerfilRepartidor(correo, contrasena, nit, telefono, municipio, lugar, transporte, licencia, nombre_archivo)
+        controlador.ActualizarPerfilRepartidor(correo, contrasena, nit, telefono, transporte, licencia, nombre_archivo, usuario)
         return jsonify({'exito':True, "msj": "Se actualizo correctamente el perfil del repartidor"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al modificar los datos del repartidor logueado: " + str(e)})
