@@ -190,13 +190,13 @@ def AgregarEmpresa(id_direccion, id_tipo_empresa, nombre, descripcion, correo, t
     return empresa_id
 
 # Controlador para insertar una solicitud en la base de datos
-def AgregarSolicitud(id_empresa, id_repartidor, tipo_solicitud, fecha, descripcion, estado):
+def AgregarSolicitud(id_empresa, id_repartidor,id_dir, tipo_solicitud, fecha, descripcion, estado):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("""INSERT INTO SOLICITUD
-        (EMPRESA_EMP_ID, REPARTIDOR_REP_ID, TIPO_SOLICITUD, FECHA, DESCRIPCION, ESTADO)
+        (EMPRESA_EMP_ID, REPARTIDOR_REP_ID, DIRECCION_DIR_ID, TIPO_SOLICITUD, FECHA, DESCRIPCION, ESTADO)
         VALUES(%s, %s, %s, %s, %s, %s)""",
-        (id_empresa, id_repartidor, tipo_solicitud, fecha, descripcion, estado))
+        (id_empresa, id_repartidor, id_dir, tipo_solicitud, fecha, descripcion, estado))
     conexion.commit()
     conexion.close()
 
