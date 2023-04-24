@@ -759,7 +759,7 @@ def DeshabilitarCliente(id_cli):
         return jsonify({'exito':False, "msg": "Error al deshabilitar al cliente: " + str(e)}) 
     
 
-#Endpoint para ver todas las empresas con solicitud de registro 
+#Endpoint para ver todas las empresas con solicitud de registro aceptada
 @app.route('/VerEmpresasAdmin', methods=['GET'])
 def VerEmpresasAdmin():
     try:
@@ -767,6 +767,15 @@ def VerEmpresasAdmin():
         return jsonify({"exito":True, "empresas":empresas})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar las empresas registradas: " + str(e)})
+    
+#Endpoint para ver todos los repartidores con solicitud de registro aceptada
+@app.route('/VerRepartidoresAdmin', methods=['GET'])
+def VerRepartidoresAdmin():
+    try:
+        repartidores = controlador.VerRepartidoresAdmin()
+        return jsonify({"exito":True, "repartidores":repartidores})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los repartidores registrados: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
