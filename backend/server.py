@@ -722,6 +722,14 @@ def SolicitudActualizarDireccionRepartidor(id_rep):
         return jsonify({"exito":True, "msj":"Solicitud de cambio de direccion de repartidor, creada exitosamente"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al actualizar la direccion del repartidor: " + str(e)})
+#Endpoint para obtener el ultimo combo insertado
+@app.route('/VerUltimoComboInsertado', methods=['GET'])
+def VerUltimoCombo():
+    try:
+        combo = controlador.VerUltimoComboInsertado()
+        return jsonify({"exito":True, "combo":combo})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar el ultimo combo: " + str(e)})
 
 #Endpoint para deshabilitar un repartidor
 @app.route('/DeshabilitarRepartidor/<id_rep>', methods=['PUT'])
