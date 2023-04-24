@@ -937,7 +937,7 @@ ORDER BY COM_ID desc limit 1;""")
         conexion.close()
         return {"COM_ID":valor[0], "NOMBRE":valor[1], "DESCRIPCION":valor[2], "PRECIO":valor[3], "FOTO":valor[4] }
 
-#Controlador para ver todos los repartidores en estado ACEPTADO para poder deshabilitarlo
+#Controlador para ver todos las empresas en estado ACEPTADO para poder deshabilitarlo
 def VerEmpresasAdmin():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
@@ -950,3 +950,16 @@ def VerEmpresasAdmin():
             new_empresa = {"EMP_ID":empresa[0], "NOMBRE":empresa[1], "USUARIO":empresa[2], "CONTRASENA":empresa[3], "DESCRIPCION":empresa[4], "TIPO_EMPRESA":empresa[5], "CORREO":empresa[6], "TELEFONO":empresa[7], "NIT":empresa[8]}
             lista_empresas.append(new_empresa)
         return lista_empresas
+    
+    #Controlador para ver todos los repartidores en estado ACEPTADO para poder deshabilitarlo
+def VerRepartidoresAdmin():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT R.REP_ID, R.NOMBRE, R.APELLIDO, R.USUARIO, R.CONTRASENA, R.CORREO, R.TELEFONO, R.NIT, R.LICENCIA, R.TRANSPORTE FROM REPARTIDOR R
+        WHERE R.ESTADO = 'ACEPTADO';""")
+        lista_repartidores = []
+        repartidores = cursor.fetchall()
+        for repartidor in repartidores:
+            new_repartidor = {"REP_ID":repartidor[0], "NOMBRE":repartidor[1], "APELLIDO":repartidor[2], "USUARIO":repartidor[3], "CONTRASENA":repartidor[4], "CORREO":repartidor[5], "TELEFONO":repartidor[6], "NIT":repartidor[7],"LICENCIA":repartidor[8],"TRANSPORTE":repartidor[9]}
+            lista_repartidores.append(new_repartidor)
+        return lista_repartidores
