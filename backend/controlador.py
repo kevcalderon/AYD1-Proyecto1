@@ -710,7 +710,7 @@ def VerPedidoAsignadoRepartidor(nombre):
 def AsignarPedidoRepartidor(id_ord, usuario_rep):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("CALL AsignarPedidoRepartidor(%s,%s)", (id_ord, usuario_rep))
+        cursor.callproc("AsignarPedidoRepartidor", (id_ord, usuario_rep,))
         conexion.commit()
         conexion.close()
 

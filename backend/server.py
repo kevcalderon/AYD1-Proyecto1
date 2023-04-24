@@ -574,8 +574,8 @@ def VerPedidoAsignadoRepartidor(nombre):
 def AsignarPedidoRepartidor():
     try:
         pet = request.json
-        id_ord = pet[0]
-        user_rep = pet[1]
+        id_ord = pet['id_ord']
+        user_rep = pet['user_rep']
         controlador.AsignarPedidoRepartidor(id_ord, user_rep)
         return jsonify({"exito":True, "msj":"Pedido asignado exitosamente"})
     except Exception as e:
