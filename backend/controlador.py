@@ -936,3 +936,17 @@ ORDER BY COM_ID desc limit 1;""")
         valor = cursor.fetchone()
         conexion.close()
         return {"COM_ID":valor[0], "NOMBRE":valor[1], "DESCRIPCION":valor[2], "PRECIO":valor[3], "FOTO":valor[4] }
+
+#Controlador para ver todos los repartidores en estado ACEPTADO para poder deshabilitarlo
+def VerEmpresasAdmin():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT E.EMP_ID, E.NOMBRE, E.USUARIO, E.CONTRASENA, E.DESCRIPCION, TE.NOMBRE, E.CORREO, E.TELEFONO, E.NIT FROM EMPRESA E
+        INNER JOIN TIPO_EMPRESA TE on E.TIPO_EMPRESA_T_EMP_ID = TE.T_EMP_ID
+        WHERE E.ESTADO = 'ACEPTADO';""")
+        lista_empresas = []
+        empresas = cursor.fetchall()
+        for empresa in empresas:
+            new_empresa = {"EMP_ID":empresa[0], "NOMBRE":empresa[1], "USUARIO":empresa[2], "CONTRASENA":empresa[3], "DESCRIPCION":empresa[4], "TIPO_EMPRESA":empresa[5], "CORREO":empresa[6], "TELEFONO":empresa[7], "NIT":empresa[8]}
+            lista_empresas.append(new_empresa)
+        return lista_empresas

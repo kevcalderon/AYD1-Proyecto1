@@ -759,6 +759,15 @@ def DeshabilitarCliente(id_cli):
         return jsonify({'exito':False, "msg": "Error al deshabilitar al cliente: " + str(e)}) 
     
 
+#Endpoint para ver todas las empresas con solicitud de registro 
+@app.route('/VerEmpresasAdmin', methods=['GET'])
+def VerEmpresasAdmin():
+    try:
+        empresas = controlador.VerEmpresasAdmin()
+        return jsonify({"exito":True, "empresas":empresas})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las empresas registradas: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
