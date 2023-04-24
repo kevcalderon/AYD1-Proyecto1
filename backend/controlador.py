@@ -353,8 +353,10 @@ def VerificarSesRepartidor(usuario, contraseña):
     conexion = obtener_conexion()
     usuariosend = None
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT * FROM REPARTIDOR WHERE USUARIO = %s and CONTRASENA = %s", (usuario,contraseña,))
+        cursor.execute("SELECT * FROM REPARTIDOR WHERE USUARIO = %s and ESTADO = 'activo'", (usuario,))
         usuariosend = cursor.fetchone()
+        if not(usuariosend and check_password_hash(usuariosend[7], contraseña)):
+            usuariosend = None
     conexion.close()
     return usuariosend
 
