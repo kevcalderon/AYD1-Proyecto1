@@ -552,10 +552,10 @@ def ModificarComboCarrit():
         return jsonify({'exito':False, "msg": "Error al modificar el combo del carrito: " + str(e)})
 
 # Endpoint para ver los pedidos pendientes de asignacion de repartidor
-@app.route('/VerPedidosPendientesRepartidor', methods=['GET'])
-def VerPedidosPendientesRepartidor():
+@app.route('/VerPedidosPendientesRepartidor/<id_repartidor>', methods=['GET'])
+def VerPedidosPendientesRepartidor(id_repartidor):
     try:
-        pedidos = controlador.VerPedidosPendientesRepartidor()
+        pedidos = controlador.VerPedidosPendientesRepartidor(id_repartidor)
         return jsonify({"exito":True, "pedidos":pedidos})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los pedidos pendientes de asignacion de repartidor: " + str(e)})   

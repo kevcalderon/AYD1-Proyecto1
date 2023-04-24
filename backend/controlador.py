@@ -632,19 +632,25 @@ def ModificarDetalleOrdenProducto(id_orden, id_producto, cantidad, observaciones
     conexion.close()
 
 # Controlador para retornar los pedidos pendientes de asignacion de repartidor
-def VerPedidosPendientesRepartidor():
+def VerPedidosPendientesRepartidor(id):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT ORD_ID, C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO  FROM ORDEN O
-        INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
-        INNER JOIN DIRECCION D on O.DIRECCION_DIR_ID = D.DIR_ID
-        INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
-        INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
-        INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
-        INNER JOIN DIRECCION D3 on R.DIRECCION_DIR_ID = D3.DIR_ID
-        INNER JOIN MUNICIPIO M2 on D3.MUNICIPIO_MUN_ID = M2.MUN_ID
-        WHERE O.ESTADO = 'RECIBIDO' AND O.REPARTIDOR_REP_ID = NULL AND D2.DEP_ID = M2.DEPARTAMENTO_DEP_ID;""")
+        cursor.execute("""
+           SELECT o.ORD_ID, c.NOMBRE, c.APELLIDO, d2.NOMBRE, m.NOMBRE, d.LUGAR, o.METODO_PAGO, o.ESTADO  
+            FROM ORDEN o 
+            INNER JOIN CLIENTE c ON c.CLI_ID = o.CLIENTE_CLI_ID 
+            INNER JOIN DIRECCION d ON d.DIR_ID = c.DIRECCION_DIR_ID
+            INNER JOIN MUNICIPIO m ON d.MUNICIPIO_MUN_ID = m.MUN_ID 
+            INNER JOIN DEPARTAMENTO d2 ON d2.DEP_ID = m.DEPARTAMENTO_DEP_ID
+            INNER JOIN REPARTIDOR r ON r.REP_ID = %s 
+            INNER JOIN DIRECCION r_d ON r_d.DIR_ID = r.DIRECCION_DIR_ID
+            INNER JOIN MUNICIPIO r_m ON r_d.MUNICIPIO_MUN_ID = r_m.MUN_ID
+            INNER JOIN DEPARTAMENTO r_d2 ON r_m.DEPARTAMENTO_DEP_ID = r_d2.DEP_ID
+            WHERE o.ESTADO = 'RECIBIDO'
+            and (r_m.MUN_ID = m.MUN_ID)
+            and (r_d2.DEP_ID = d2.DEP_ID)""", (id,))
         pendientes = cursor.fetchall()
+        print(pendientes)
         lista_pedidos = []
         for pedido in pendientes:
             new_pendiente = {"ORD_ID":pedido[0], "CLIENTE":pedido[1]+" "+pedido[2], "DEPARTAMENTO":pedido[3], "MUNICIPIO":pedido[4], "LUGAR":pedido[5], "METODO_PAGO":pedido[6], "ESTADO":pedido[7]}
