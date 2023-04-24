@@ -35,6 +35,21 @@ function VerCombos() {
     });
   };
 
+  const eliminarCombo = async (idCombo) => {
+    await fetch(`${API_URL}/eliminarCombo/${idCombo}`, {
+      method: "DELETE",
+      headers: { "Content-type": "application/json; charset=UTF-8" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        verCombos();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -52,11 +67,18 @@ function VerCombos() {
         header: "Precio",
         id: "precio",
       },
-      // {
-      //   accessorKey: "DETALLE_COMBO",
-      //   header: "Detalle",
-      //   id: "detalle",
-      // },
+      {
+        accessorKey: "DETALLE_COMBO",
+        header: "Detalle de productos",
+        id: "detalle",
+        Cell: ({ row }) => (
+          <div>
+            {row.original.DETALLE_COMBO.map((prod) => {
+              return <li>{prod.nombre}</li>;
+            })}
+          </div>
+        ),
+      },
       {
         accessorKey: "FOTOGRAFIA",
         header: "Imagen",
@@ -83,9 +105,9 @@ function VerCombos() {
             <Button
               variant="danger"
               style={{ margin: "1.5%" }}
-              // onClick={() => {
-              //   eliminarProducto(row.original.PRO_ID);
-              // }}
+              onClick={() => {
+                eliminarCombo(row.original.ID_COMBO);
+              }}
             >
               <div
                 style={{

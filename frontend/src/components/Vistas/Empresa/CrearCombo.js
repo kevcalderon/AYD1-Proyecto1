@@ -58,6 +58,7 @@ function CrearCombo() {
           // mostrarComponente(res.msg);
         } else {
           resetCombo();
+          getUltimoCombo();
           // mostrarComponente(res.msg);
         }
       });
@@ -86,19 +87,30 @@ function CrearCombo() {
 
   const onSubmitComboItem = async (values) => {
     console.log(values);
-  };
-
-  const getCombos = async () => {
     const empresa = JSON.parse(localStorage.getItem("empresa"));
+    const formData = new FormData();
+    formData.append("id_combo", values.id_combo);
+    formData.append("id_producto", values.id_producto);
+    formData.append("cantidad", values.cantidad);
+    formData.append("observaciones", values.observaciones);
 
-    await fetch(`${API_URL}/obtenerCombosEmpresa/${empresa.EMP_ID}`, {
-      method: "GET",
+    await fetch(`${API_URL}/agregarProductoACombo`, {
+      method: "POST",
+      body: formData,
     })
       .then((response) => response.json())
       .then((res) => {
         console.log(res);
-        setCombosInfo(res.combos);
+        if (res.exito == false) {
+          // mostrarComponente(res.msg);
+        } else {
+          resetComboItem();
+
+          // mostrarComponente(res.msg);
+        }
       });
+
+    // reset();
   };
 
   const getProductos = async () => {
@@ -109,12 +121,23 @@ function CrearCombo() {
     })
       .then((response) => response.json())
       .then((res) => {
+        console.log(res);
         setProductoEmpresa(res);
       });
   };
 
+  const getUltimoCombo = async () => {
+    await fetch(`${API_URL}/VerUltimoComboInsertado`, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((res) => {
+        console.log(res);
+        setCombosInfo(res.combo);
+      });
+  };
+
   useEffect(() => {
-    getCombos();
     getProductos();
   }, []);
 
@@ -198,24 +221,24 @@ function CrearCombo() {
                     name="idCombo"
                     {...registerComboItem("id_combo")}
                   >
-                    <option>Escoge tu combo</option>
-                    {/* {combosInfo.map((combo, index) => {
-                      return (
-                        <option value={combo.PROD_ID} key={index}>
-                          {combo.NOMBRE_PRODUCTO}
-                        </option>
-                      );
-                    })} */}
+                    <option>Selecciona el ultimo combo</option>
+                    {combosInfo.length === 0 ? (
+                      <option></option>
+                    ) : (
+                      <option value={combosInfo.COM_ID}>
+                        {combosInfo.NOMBRE}
+                      </option>
+                    )}
                   </Form.Select>
                   <br></br>
                   <Form.Select
-                    name="idProducto"
+                    name="id_producto"
                     {...registerComboItem("id_producto")}
                   >
                     <option>Escoge tu producto</option>
                     {productoEmpresa.map((producto, index) => {
                       return (
-                        <option value={producto.PROD_ID} key={index}>
+                        <option value={producto.PRO_ID} key={index}>
                           {producto.NOMBRE_PRODUCTO}
                         </option>
                       );
