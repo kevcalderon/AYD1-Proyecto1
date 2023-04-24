@@ -691,6 +691,14 @@ def VerPedidosEntregadosRepartidor(usuario):
         return jsonify({'exito':False, "msg": "Error al mostar las ordenes del cliente: " + str(e)})
 
 
+#Endpoint para obtener el ultimo combo insertado
+@app.route('/VerUltimoComboInsertado', methods=['GET'])
+def VerUltimoCombo():
+    try:
+        combo = controlador.VerUltimoComboInsertado()
+        return jsonify({"exito":True, "combo":combo})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar el ultimo combo: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")

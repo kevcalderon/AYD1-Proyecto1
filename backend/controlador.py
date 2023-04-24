@@ -867,3 +867,11 @@ def VerPedidosEntregadosRepartidor(usuario):
         conexion.close()
         return lista_pedidos
         
+def VerUltimoComboInsertado():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT * FROM COMBO
+ORDER BY COM_ID desc limit 1;""")
+        valor = cursor.fetchone()
+        conexion.close()
+        return {"COM_ID":valor[0], "NOMBRE":valor[1], "DESCRIPCION":valor[2], "PRECIO":valor[3], "FOTO":valor[4] }
