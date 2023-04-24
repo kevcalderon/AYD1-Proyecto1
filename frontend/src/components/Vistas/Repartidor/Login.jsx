@@ -14,8 +14,8 @@ function Login() {
   const navigate = useNavigate();
   const [mostrarAlert, setMostrarAlert] = useState(false);
   const validationSchema = z.object({
-    nombre_empresa: z.string().min(1, { message: "Campo Obligatorio" }),
-    contrasenia: z.string().min(1, { message: "Campo Obligatorio" }),
+    username: z.string().min(1, { message: "Campo Obligatorio" }),
+    password: z.string().min(1, { message: "Campo Obligatorio" }),
   });
 
   const methods = useForm({
@@ -81,7 +81,7 @@ function Login() {
                 <FormInput
                   placeholder="Ingresa su username"
                   errors={errors}
-                  name="nombre_empresa"
+                  name="username"
                   controlId="idNombreEmpresa"
                   type="text"
                   register={register}
@@ -90,7 +90,7 @@ function Login() {
                 <FormInput
                   placeholder="Ingresa tu contraseña"
                   errors={errors}
-                  name="contrasenia"
+                  name="password"
                   controlId="idPassword"
                   type="password"
                   register={register}
