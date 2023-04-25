@@ -671,33 +671,34 @@ def VerIdRepartidorLog(nombre):
 def VerIdOrdenAsignadaRepartidor(rep_id):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE ESTADO = 'EN PROCESO' AND REPARTIDOR_REP_ID =" + str(rep_id))
-        id_ord = cursor.fetchone()[0]
+        cursor.execute("SELECT ORD_ID FROM ORDEN WHERE ESTADO = 'EN PROCESO' AND REPARTIDOR_REP_ID =%s",(rep_id,))
+        id_ord = cursor.fetchone()
         conexion.close()
         return id_ord 
 
 #Controlador para retornar la orden asignada al repartidor
-def VerPedidoAsignadoRepartidor(nombre):
+def VerPedidoAsignadoRepartidor(id_repartidor):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        id_usuario = VerIdRepartidorLog(nombre)
-        id_ord = VerIdOrdenAsignadaRepartidor(id_usuario)
+        id_ord = VerIdOrdenAsignadaRepartidor(id_repartidor)
         cursor.execute("""SELECT O.ORD_ID, C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO FROM ORDEN O
         INNER JOIN CLIENTE C on O.CLIENTE_CLI_ID = C.CLI_ID
         INNER JOIN DIRECCION D on O.DIRECCION_DIR_ID = D.DIR_ID
         INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
         INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
-        WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID = %s""", (id_ord,))
-        pedido = cursor.fetchone()[0]
-        cursor.execute("""SELECT C.NOMBRE, P.NOMBRE, D.CANTIDAD  FROM DETALLE_ORDEN D
-        INNER JOIN COMBO C on D.COMBO_COM_ID = C.COM_ID
-        INNER JOIN PRODUCTO P on D.PRODUCTO_PRO_ID = P.PRO_ID
-        WHERE D.ORDEN_ORD_ID = %s""",(id_ord,))
+        WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID = %s""", id_ord)
+        pedido = cursor.fetchone()
+        cursor.execute("""SELECT COALESCE(C.NOMBRE, '') as nombre_combo, P.NOMBRE, D.CANTIDAD
+            FROM DETALLE_ORDEN D
+            LEFT JOIN COMBO C ON D.COMBO_COM_ID = C.COM_ID
+            INNER JOIN PRODUCTO P ON D.PRODUCTO_PRO_ID = P.PRO_ID
+            WHERE D.ORDEN_ORD_ID = %s""", id_ord)
         lista_p = []
         new_prod = None
         lista_productos = cursor.fetchall()
+        print(lista_productos)
         for producto in lista_productos:
-            if producto[0] != None:
+            if producto[0] != "":
                 new_prod = {"PROMOCION":producto[0], "CANTIDAD":producto[2]}
                 lista_p.append(new_prod)
             elif producto[1] != None:
