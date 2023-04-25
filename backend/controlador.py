@@ -963,3 +963,16 @@ def VerRepartidoresAdmin():
             new_repartidor = {"REP_ID":repartidor[0], "NOMBRE":repartidor[1], "APELLIDO":repartidor[2], "USUARIO":repartidor[3], "CONTRASENA":repartidor[4], "CORREO":repartidor[5], "TELEFONO":repartidor[6], "NIT":repartidor[7],"LICENCIA":repartidor[8],"TRANSPORTE":repartidor[9]}
             lista_repartidores.append(new_repartidor)
         return lista_repartidores
+    
+        #Controlador para ver todos los clientes en estado ACEPTADO para poder deshabilitarlo
+def VerClientesAdmin():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT C.CLI_ID, C.NOMBRE, C.APELLIDO, C.USUARIO, C.CONTRASENA, C.CORREO, C.TELEFONO, C.NIT, C.TARJETA FROM CLIENTE C
+        WHERE C.ESTADO = 'ACEPTADO';""")
+        lista_clientes = []
+        clientes = cursor.fetchall()
+        for cliente in clientes:
+            new_cliente = {"CLI_ID":cliente[0], "NOMBRE":cliente[1], "APELLIDO":cliente[2], "USUARIO":cliente[3], "CONTRASENA":cliente[4], "CORREO":cliente[5], "TELEFONO":cliente[6], "NIT":cliente[7],"TARJETA":cliente[8]}
+            lista_clientes.append(new_cliente)
+        return lista_clientes
