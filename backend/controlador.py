@@ -991,3 +991,17 @@ def VerSolicitudesRepartidores():
             new_solicitud = {"REP_ID":solicitud[0], "NOMBRE":solicitud[1], "APELLIDO":solicitud[2], "CORREO":solicitud[3], "TELEFONO":solicitud[4], "DESCRIPCION":solicitud[5], "FECHA":solicitud[6], "TIPO_SOLICITUD":solicitud[7]}
             lista_solicitudes.append(new_solicitud)
         return lista_solicitudes
+    
+#Controlador para ver todos las solicitudes de las empresas
+def VerSolicitudesEmpresas():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT E.EMP_ID, E.NOMBRE, E.CORREO, E.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
+        INNER JOIN  EMPRESA E on S.EMPRESA_EMP_ID = E.EMP_ID
+        WHERE S.ESTADO = 'PENDIENTE' AND EMPRESA_EMP_ID != NULL;""")
+        lista_solicitudes = []
+        solicitudes = cursor.fetchall()
+        for solicitud in solicitudes:
+            new_solicitud = {"EMP_ID":solicitud[0], "NOMBRE":solicitud[1], "CORREO":solicitud[2], "TELEFONO":solicitud[3], "DESCRIPCION":solicitud[4], "FECHA":solicitud[5], "TIPO_SOLICITUD":solicitud[6]}
+            lista_solicitudes.append(new_solicitud)
+        return lista_solicitudes
