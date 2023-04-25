@@ -777,6 +777,16 @@ def VerRepartidoresAdmin():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los repartidores registrados: " + str(e)})
 
+#Endpoint para ver todos los clientes que no han sido deshabilitados en el sistema
+@app.route('/VerClientesAdmin', methods=['GET'])
+def VerClientesAdmin():
+    try:
+        clientes = controlador.VerClientesAdmin()
+        return jsonify({"exito":True, "clientes":clientes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los clientes registrados: " + str(e)})
+
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
