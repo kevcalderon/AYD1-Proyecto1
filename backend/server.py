@@ -794,6 +794,15 @@ def VerSolicitudesRepartidores():
         return jsonify({"exito":True, "solicitudes":solicitudes})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar las solicitudes de los repartidores: " + str(e)})
+    
+#Endpoint para ver las solicitudes de las empresas
+@app.route('/VerSolicitudesEmpresas', methods=['GET'])
+def VerSolicitudesEmpresas():
+    try:
+        solicitudes = controlador.VerSolicitudesEmpresas()
+        return jsonify({"exito":True, "solicitudes":solicitudes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las solicitudes de las empresas: " + str(e)})
 
 
 if __name__ == '__main__':
