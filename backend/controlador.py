@@ -976,3 +976,18 @@ def VerClientesAdmin():
             new_cliente = {"CLI_ID":cliente[0], "NOMBRE":cliente[1], "APELLIDO":cliente[2], "USUARIO":cliente[3], "CONTRASENA":cliente[4], "CORREO":cliente[5], "TELEFONO":cliente[6], "NIT":cliente[7],"TARJETA":cliente[8]}
             lista_clientes.append(new_cliente)
         return lista_clientes
+    
+
+        #Controlador para ver todos las solicitudes de los repartidores
+def VerSolicitudesRepartidores():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT R.REP_ID, R.NOMBRE, R.APELLIDO, R.CORREO, R.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
+        INNER JOIN REPARTIDOR R on S.REPARTIDOR_REP_ID = R.REP_ID
+        WHERE S.ESTADO = 'PENDIENTE' AND S.REPARTIDOR_REP_ID != NULL;""")
+        lista_solicitudes = []
+        solicitudes = cursor.fetchall()
+        for solicitud in solicitudes:
+            new_solicitud = {"REP_ID":solicitud[0], "NOMBRE":solicitud[1], "APELLIDO":solicitud[2], "CORREO":solicitud[3], "TELEFONO":solicitud[4], "DESCRIPCION":solicitud[5], "FECHA":solicitud[6], "TIPO_SOLICITUD":solicitud[7]}
+            lista_solicitudes.append(new_solicitud)
+        return lista_solicitudes
