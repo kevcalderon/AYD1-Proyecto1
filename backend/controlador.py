@@ -284,7 +284,7 @@ def MostrarOrdenes(id_empresa):
         LEFT JOIN PRODUCTO p ON p.PRO_ID = do.PRODUCTO_PRO_ID  
         WHERE (p.EMPRESA_EMP_ID = %s OR c2.COM_ID IN (SELECT COMBO_COM_ID FROM DETALLE_COMBO dc 
         INNER JOIN PRODUCTO p ON p.PRO_ID = dc.PRODUCTO_PRO_ID
-        WHERE p.EMPRESA_EMP_ID = %s)) AND o.ESTADO = 'PENDIENTE'
+        WHERE p.EMPRESA_EMP_ID = %s)) AND o.ESTADO = 'PENDIENTE' AND do.ESTADO = 'PENDIENTE'
         GROUP BY o.ORD_ID""", (id_empresa, id_empresa ))
         combos = cursor.fetchall()
         
