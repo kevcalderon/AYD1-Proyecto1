@@ -1029,3 +1029,13 @@ def VerPedidosProcesoRepartidor(id_rep):
         valor = cursor.fetchone()[0]
         new_val = valor
     return new_val
+
+#Controlador para obtener la cantidad de pedidos en proceso que tiene el cliente
+def VerPedidosProcesoCliente(id_cli):
+    conexion = obtener_conexion()
+    new_val = -1
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(O.ESTADO) AS CANTIDAD FROM ORDEN O WHERE O.ESTADO = 'EN PROCESO' AND O.CLIENTE_CLI_ID =%s;""",(id_cli,))
+        valor = cursor.fetchone()[0]
+        new_val = valor
+    return new_val
