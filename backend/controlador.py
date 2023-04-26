@@ -982,13 +982,13 @@ def VerClientesAdmin():
 def VerSolicitudesRepartidores():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT R.REP_ID, R.NOMBRE, R.APELLIDO, R.CORREO, R.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
+        cursor.execute("""SELECT S.SOL_ID, R.REP_ID, R.NOMBRE, R.APELLIDO, R.CORREO, R.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
         INNER JOIN REPARTIDOR R on S.REPARTIDOR_REP_ID = R.REP_ID
         WHERE S.ESTADO = 'PENDIENTE' AND S.REPARTIDOR_REP_ID != NULL;""")
         lista_solicitudes = []
         solicitudes = cursor.fetchall()
         for solicitud in solicitudes:
-            new_solicitud = {"REP_ID":solicitud[0], "NOMBRE":solicitud[1], "APELLIDO":solicitud[2], "CORREO":solicitud[3], "TELEFONO":solicitud[4], "DESCRIPCION":solicitud[5], "FECHA":solicitud[6], "TIPO_SOLICITUD":solicitud[7]}
+            new_solicitud = {"SOL_ID":solicitud[0],"REP_ID":solicitud[1], "NOMBRE":solicitud[2], "APELLIDO":solicitud[3], "CORREO":solicitud[4], "TELEFONO":solicitud[5], "DESCRIPCION":solicitud[6], "FECHA":solicitud[7], "TIPO_SOLICITUD":solicitud[8]}
             lista_solicitudes.append(new_solicitud)
         return lista_solicitudes
     
@@ -996,13 +996,13 @@ def VerSolicitudesRepartidores():
 def VerSolicitudesEmpresas():
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT E.EMP_ID, E.NOMBRE, E.CORREO, E.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
+        cursor.execute("""SELECT S.SOL_ID, E.EMP_ID, E.NOMBRE, E.CORREO, E.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
         INNER JOIN  EMPRESA E on S.EMPRESA_EMP_ID = E.EMP_ID
         WHERE S.ESTADO = 'PENDIENTE' AND EMPRESA_EMP_ID != NULL;""")
         lista_solicitudes = []
         solicitudes = cursor.fetchall()
         for solicitud in solicitudes:
-            new_solicitud = {"EMP_ID":solicitud[0], "NOMBRE":solicitud[1], "CORREO":solicitud[2], "TELEFONO":solicitud[3], "DESCRIPCION":solicitud[4], "FECHA":solicitud[5], "TIPO_SOLICITUD":solicitud[6]}
+            new_solicitud = {"SOL_ID":solicitud[0], "EMP_ID":solicitud[1], "NOMBRE":solicitud[2], "CORREO":solicitud[3], "TELEFONO":solicitud[4], "DESCRIPCION":solicitud[5], "FECHA":solicitud[6], "TIPO_SOLICITUD":solicitud[7]}
             lista_solicitudes.append(new_solicitud)
         return lista_solicitudes
     
@@ -1063,3 +1063,4 @@ def CrearInhabilitacionCliente(id_emp, id_rep, id_cli, tipo, fecha, descripcion)
         cursor.execute("""INSERT INTO INHABILITACION(EMPRESA_EMP_ID, REPARTIDOR_REP_ID, CLIENTE_CLI_ID, TIPO_INHABILITACION, FECHA, DESCRIPCION) VALUES(%s, %s, %s, %s, %s, %s)""",(id_emp, id_rep, id_cli, tipo, fecha, descripcion))
         conexion.commit()
         conexion.close()
+
