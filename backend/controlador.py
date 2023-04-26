@@ -1039,3 +1039,27 @@ def VerPedidosProcesoCliente(id_cli):
         valor = cursor.fetchone()[0]
         new_val = valor
     return new_val
+
+#Controlador para crear la inhabilitacion de la empresa
+def CrearInhabilitacionEmpresa(id_emp, id_rep, id_cli, tipo, fecha, descripcion):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO INHABILITACION(EMPRESA_EMP_ID, REPARTIDOR_REP_ID, CLIENTE_CLI_ID, TIPO_INHABILITACION, FECHA, DESCRIPCION) VALUES(%s, %s, %s, %s, %s, %s)""",(id_emp, id_rep, id_cli, tipo, fecha, descripcion))
+        conexion.commit()
+        conexion.close()
+
+#Controlador para crear la inhabilitacion del repartidor
+def CrearInhabilitacionRepartidor(id_emp, id_rep, id_cli, tipo, fecha, descripcion):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO INHABILITACION(EMPRESA_EMP_ID, REPARTIDOR_REP_ID, CLIENTE_CLI_ID, TIPO_INHABILITACION, FECHA, DESCRIPCION) VALUES(%s, %s, %s, %s, %s, %s)""",(id_emp, id_rep, id_cli, tipo, fecha, descripcion))
+        conexion.commit()
+        conexion.close()
+
+#Controlador para crear la inhabilitacion del cliente
+def CrearInhabilitacionCliente(id_emp, id_rep, id_cli, tipo, fecha, descripcion):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO INHABILITACION(EMPRESA_EMP_ID, REPARTIDOR_REP_ID, CLIENTE_CLI_ID, TIPO_INHABILITACION, FECHA, DESCRIPCION) VALUES(%s, %s, %s, %s, %s, %s)""",(id_emp, id_rep, id_cli, tipo, fecha, descripcion))
+        conexion.commit()
+        conexion.close()
