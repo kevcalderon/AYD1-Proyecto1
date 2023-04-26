@@ -735,8 +735,14 @@ def VerUltimoCombo():
 @app.route('/DeshabilitarRepartidor/<id_rep>', methods=['PUT'])
 def DeshabilitarRepartidor(id_rep):
     try:
-        controlador.DeshabilitarRepartidor(id_rep)
-        return jsonify({"exito":True, "msj":"Se ha deshabilitado el repartidor exitosamente"})
+        pedidos = controlador.VerPedidosProcesoRepartidor(id_rep)
+        if pedidos == 0:
+            controlador.DeshabilitarRepartidor(id_rep)
+            return jsonify({"exito":True, "msj":"Se ha deshabilitado al repartidor exitosamente"})
+        elif pedidos >= 1:
+            return jsonify({'exito':False, "msg": "Error al deshabilitar al repartidor porque tiene pedidos en proceso"})
+        else:
+            return jsonify({'exito':False, "msg": "Error al deshabilitar al repartidor"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al deshabilitar al repartidor: " + str(e)})
 
