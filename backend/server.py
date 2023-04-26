@@ -738,6 +738,7 @@ def DeshabilitarRepartidor(id_rep):
         pedidos = controlador.VerPedidosProcesoRepartidor(id_rep)
         if pedidos == 0:
             controlador.DeshabilitarRepartidor(id_rep)
+            controlador.CrearInhabilitacionRepartidor(None, id_rep, None, "REPARTIDOR", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),"USUARIO REPARTIDOR INHABILITADO")
             return jsonify({"exito":True, "msj":"Se ha deshabilitado al repartidor exitosamente"})
         elif pedidos >= 1:
             return jsonify({'exito':False, "msg": "Error al deshabilitar al repartidor porque tiene pedidos en proceso"})
@@ -753,6 +754,7 @@ def DeshabilitarEmpresa(id_emp):
         pedidos = controlador.VerPedidosProcesoEmpresa(id_emp)
         if pedidos == 0:
             controlador.DeshabilitarEmpresa(id_emp)
+            controlador.CrearInhabilitacionEmpresa(id_emp, None, None, "EMPRESA", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "USUARIO EMPRESA INHABILITADO")
             return jsonify({"exito":True, "msj":"Se ha deshabilitado la empresa exitosamente"})
         elif pedidos >= 1:
             return jsonify({'exito':False, "msg": "Error al deshabilitar a la empresa porque tiene pedidos en proceso"})
@@ -768,6 +770,7 @@ def DeshabilitarCliente(id_cli):
         pedidos = controlador.VerPedidosProcesoCliente(id_cli)
         if pedidos == 0:
             controlador.DeshabilitarCliente(id_cli)
+            controlador.CrearInhabilitacionCliente(None, None, id_cli, "CLIENTE", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "USUARIO CLIENTE INHABILITADO")
             return jsonify({"exito":True, "msj":"Se ha deshabilitado al cliente exitosamente"})
         elif pedidos >= 1:
             return jsonify({'exito':False, "msg": "Error al deshabilitar al cliente porque tiene pedidos en proceso"})
