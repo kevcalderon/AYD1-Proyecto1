@@ -1005,3 +1005,17 @@ def VerSolicitudesEmpresas():
             new_solicitud = {"EMP_ID":solicitud[0], "NOMBRE":solicitud[1], "CORREO":solicitud[2], "TELEFONO":solicitud[3], "DESCRIPCION":solicitud[4], "FECHA":solicitud[5], "TIPO_SOLICITUD":solicitud[6]}
             lista_solicitudes.append(new_solicitud)
         return lista_solicitudes
+    
+#Controlador para obtener la cantidad de pedidos en proceso que tiene la empresa
+def VerPedidosProcesoEmpresa(id_emp):
+    conexion = obtener_conexion()
+    new_val = -1
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(O.ESTADO) AS CANTIDAD FROM ORDEN O
+        INNER JOIN DETALLE_ORDEN D on O.ORD_ID = D.ORDEN_ORD_ID
+        INNER JOIN PRODUCTO P on D.PRODUCTO_PRO_ID = P.PRO_ID
+        INNER JOIN EMPRESA E on P.EMPRESA_EMP_ID = E.EMP_ID
+        WHERE E.EMP_ID = %s AND O.ESTADO = 'EN PROCESO';""",(id_emp,))
+        valor = cursor.fetchone()[0]
+        new_val = valor
+    return new_val

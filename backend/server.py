@@ -744,8 +744,14 @@ def DeshabilitarRepartidor(id_rep):
 @app.route('/DeshabilitarEmpresa/<id_emp>',methods=['PUT'])
 def DeshabilitarEmpresa(id_emp):
     try:
-        controlador.DeshabilitarEmpresa(id_emp)
-        return jsonify({"exito":True, "msj":"Se ha deshabilitado la empresa exitosamente"})
+        pedidos = controlador.VerPedidosProcesoEmpresa(id_emp)
+        if pedidos == 0:
+            controlador.DeshabilitarEmpresa(id_emp)
+            return jsonify({"exito":True, "msj":"Se ha deshabilitado la empresa exitosamente"})
+        elif pedidos >= 1:
+            return jsonify({'exito':False, "msg": "Error al deshabilitar a la empresa porque tiene pedidos en proceso"})
+        else:
+            return jsonify({'exito':False, "msg": "Error al deshabilitar a la empresa"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al deshabilitar a la empresa: " + str(e)})
 
