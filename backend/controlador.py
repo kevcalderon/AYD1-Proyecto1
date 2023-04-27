@@ -1064,3 +1064,15 @@ def CrearInhabilitacionCliente(id_emp, id_rep, id_cli, tipo, fecha, descripcion)
         conexion.commit()
         conexion.close()
 
+#Controlador para llamar al procedimiento de aceptar solicitudes como administrador
+def AceptarSolicitudes(id_sol):
+    conexion = obtener_conexion()
+    salida = ""
+    with conexion.cursor() as cursor:
+        res = cursor.callproc("AceptarSolicitud", (id_sol, salida))
+        conexion.commit()
+        conexion.close()
+        return res[1]
+    
+    
+

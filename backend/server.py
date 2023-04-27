@@ -824,6 +824,15 @@ def VerSolicitudesEmpresas():
         return jsonify({"exito":True, "solicitudes":solicitudes})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar las solicitudes de las empresas: " + str(e)})
+    
+#Endpoint para aceptar las solicitudes como administrador
+@app.route('/AceptarSolicitud/<id_sol>', methods=['PUT'])
+def AceptarSolicitud(id_sol):
+    try:
+        salida = controlador.AceptarSolicitudes(id_sol)
+        return jsonify({"exito":True, "respuesta":salida})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al aceptar las solicitudes: " + str(e)})
 
 
 if __name__ == '__main__':
