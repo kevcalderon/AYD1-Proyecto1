@@ -833,6 +833,16 @@ def AceptarSolicitud(id_sol):
         return jsonify({"exito":True, "respuesta":salida})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al aceptar las solicitudes: " + str(e)})
+    
+
+#Endpoint para rechazar las solicitudes como administrador
+@app.route('/RechazarSolicitud/<id_sol>', methods=['PUT'])
+def RechazarSolicitud(id_sol):
+    try:
+        salida = controlador.RechazarSolicitudes(id_sol)
+        return jsonify({"exito":True, "respuesta":salida})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al rechazar las solicitudes: " + str(e)})
 
 
 if __name__ == '__main__':

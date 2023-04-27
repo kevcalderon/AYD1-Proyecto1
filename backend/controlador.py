@@ -1074,5 +1074,16 @@ def AceptarSolicitudes(id_sol):
         conexion.close()
         return res[1]
     
+
+#Controlador para llamar al procedimiento de rechazar solicitudes como administrador
+def RechazarSolicitudes(id_sol):
+    conexion = obtener_conexion()
+    salida = ""
+    with conexion.cursor() as cursor:
+        res = cursor.callproc("RechazarSolicitud", (id_sol, salida))
+        conexion.commit()
+        conexion.close()
+        return res[1]
+    
     
 
