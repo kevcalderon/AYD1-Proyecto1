@@ -674,11 +674,14 @@ def VerIdOrdenAsignadaRepartidor(rep_id):
         cursor.execute("SELECT ORD_ID FROM ORDEN WHERE ESTADO = 'EN PROCESO' AND REPARTIDOR_REP_ID =%s",(rep_id,))
         id_ord = cursor.fetchone()
         conexion.close()
+        if not id_ord: 
+            raise Exception('No records')
         return id_ord 
 
 #Controlador para retornar la orden asignada al repartidor
 def VerPedidoAsignadoRepartidor(id_repartidor):
     conexion = obtener_conexion()
+    print('test')
     with conexion.cursor() as cursor:
         id_ord = VerIdOrdenAsignadaRepartidor(id_repartidor)
         cursor.execute("""SELECT O.ORD_ID, C.NOMBRE, C.APELLIDO, D2.NOMBRE, M.NOMBRE, D.LUGAR, O.METODO_PAGO, O.ESTADO FROM ORDEN O
@@ -688,7 +691,11 @@ def VerPedidoAsignadoRepartidor(id_repartidor):
         INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
         WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID = %s""", id_ord)
         pedido = cursor.fetchone()
-        cursor.execute("""SELECT COALESCE(C.NOMBRE, '') as nombre_combo, P.NOMBRE, D.CANTIDAD
+        if not pedido:
+            raise Exception('No records')
+
+        print('testing')
+        cursor.execute("""SELECT COALESCE(C.NOMBRE, '') as nombre_combo, P.NOMBRE, D.CANTIDAD, D.OBSERVACIONES
             FROM DETALLE_ORDEN D
             LEFT JOIN COMBO C ON D.COMBO_COM_ID = C.COM_ID
             INNER JOIN PRODUCTO P ON D.PRODUCTO_PRO_ID = P.PRO_ID
@@ -699,10 +706,10 @@ def VerPedidoAsignadoRepartidor(id_repartidor):
         print(lista_productos)
         for producto in lista_productos:
             if producto[0] != "":
-                new_prod = {"PROMOCION":producto[0], "CANTIDAD":producto[2]}
+                new_prod = {"DESCRIPCION":producto[0], "CANTIDAD":producto[2], "OBSERVACIONES": producto[3]}
                 lista_p.append(new_prod)
             elif producto[1] != None:
-                new_prod = {"PRODUCTO":producto[1], "CANTIDAD":producto[2]}
+                new_prod = {"DESCRIPCION":producto[1], "CANTIDAD":producto[2], "OBSERVACIONES": producto[3]}
                 lista_p.append(new_prod)
         asignado = {"ORD_ID":pedido[0],"CLIENTE":pedido[1]+" "+pedido[2], "DEPARTAMENTO":pedido[3], "MUNICIPIO":pedido[4], "LUGAR":pedido[5], "METODO_PAGO":pedido[6], "ESTADO":pedido[7], "PRODUCTOS":lista_p}
         return asignado
@@ -717,12 +724,14 @@ def AsignarPedidoRepartidor(id_ord, usuario_rep):
 
 #Controlador para cambiar el estado del pedido a "entregado" 
 def EntregarPedidoRepartidor(ord_id, usuario):
+    print('ord_id ', ord_id)
+    print('rep ', usuario)
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("""UPDATE ORDEN O
         INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
         SET O.ESTADO = 'ENTREGADO'
-        WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID=%s AND R.USUARIO = %s;""", (ord_id, usuario))
+        WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID=%s AND R.REP_ID = %s;""", (ord_id, usuario,))
         conexion.commit()
         conexion.close()
 
