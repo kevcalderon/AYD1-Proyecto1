@@ -586,8 +586,9 @@ def AsignarPedidoRepartidor():
 def EntregarPedidoRepartidor():
     try:
         resp = request.json
-        ord_id = resp[0]
-        usuario = resp[1]
+        print(resp)
+        ord_id = resp['ord_id']
+        usuario = resp['user_rep']
         controlador.EntregarPedidoRepartidor(ord_id, usuario)
         return jsonify({"exito":True, "msj":"Pedido entregado exitosamente"})
     except Exception as e:
