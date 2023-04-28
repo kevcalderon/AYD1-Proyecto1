@@ -1095,5 +1095,99 @@ def RechazarSolicitudes(id_sol):
         conexion.close()
         return res[1]
     
-    
+#Controlador para obtener el total de los detalles de una orden
+def ObtenerTotalOrden(id_orden):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT combotot.TOTAL + prodtot.TOTAL as total FROM (
 
+(SELECT SUM(D.CANTIDAD * P.PRECIO) AS TOTAL FROM DETALLE_ORDEN D 
+        INNER JOIN COMBO P on D.COMBO_COM_ID = P.COM_ID
+        WHERE D.ORDEN_ORD_ID = %s)  AS combotot,
+        
+(SELECT SUM(D.CANTIDAD * P.PRECIO) AS TOTAL FROM DETALLE_ORDEN D 
+        INNER JOIN PRODUCTO P on D.PRODUCTO_PRO_ID = P.PRO_ID
+        WHERE D.ORDEN_ORD_ID = %s)  as prodtot)""",(id_orden,id_orden,))
+        total = cursor.fetchone()[0]
+        return total
+
+#Controlador para insertar en la tabla VENTA la orden completada
+def InsertarVenta(id_orden, total):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""INSERT INTO VENTA(ORDEN_ORD_ID, FECHA, TOTAL) VALUES( %s, NOW(), %s)""",( id_orden, total))
+        conexion.commit()
+        conexion.close()    
+
+#controlador para obtener el numero total de pedidos generados en el mes
+def ObtenerPedidosMes():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(ORD_ID) AS PEDIDOS FROM ORDEN WHERE MONTH(FECHA) = MONTH(NOW())""")
+        total = cursor.fetchone()[0]
+        return total
+
+#controlador para obtener el total de los pedidos por empresa en el mes
+def ObtenerTotalPedidosMesEmpresa(id_emp):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute(""" SELECT TOTPRO.TOTAL + TOTCOMBO.TOTAL AS TOTAL FROM (
+(SELECT SUM(PRODUCTO.PRECIO * DETALLE_ORDEN.CANTIDAD) AS TOTAL 
+FROM ((ORDEN inner join DETALLE_ORDEN ON DETALLE_ORDEN.ORDEN_ORD_ID = ORDEN.ORD_ID)
+inner join PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_ORDEN.PRODUCTO_PRO_ID)
+WHERE MONTH(ORDEN.FECHA) = MONTH(NOW()) AND PRODUCTO.EMPRESA_EMP_ID = %s) AS TOTPRO,
+(SELECT SUM(COMBO.PRECIO * DETALLE_ORDEN.CANTIDAD) AS TOTAL 
+FROM ((((ORDEN inner join DETALLE_ORDEN ON DETALLE_ORDEN.ORDEN_ORD_ID = ORDEN.ORD_ID)
+inner join COMBO ON COMBO.COM_ID= DETALLE_ORDEN.COMBO_COM_ID)
+INNER JOIN DETALLE_COMBO ON DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID)
+INNER JOIN PRODUCTO ON PRODUCTO.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID)
+WHERE MONTH(ORDEN.FECHA) = MONTH(NOW()) AND PRODUCTO.EMPRESA_EMP_ID = %s) AS TOTCOMBO);""",(id_emp,id_emp,))
+        total = cursor.fetchone()[0]
+        return total
+
+#obtener el conteo de pedidos por empresa en el mes
+def ObtenerConteoPedidosMesEmpresa(id_emp):
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT distinct COUNT(COMBO.COM_ID)
+FROM (((((ORDEN inner join DETALLE_ORDEN ON DETALLE_ORDEN.ORDEN_ORD_ID = ORDEN.ORD_ID)
+inner join COMBO ON COMBO.COM_ID= DETALLE_ORDEN.COMBO_COM_ID)
+INNER JOIN PRODUCTO AS P ON P.PRO_ID = DETALLE_ORDEN.PRODUCTO_PRO_ID)
+INNER JOIN DETALLE_COMBO ON DETALLE_COMBO.COMBO_COM_ID = COMBO.COM_ID)
+INNER JOIN PRODUCTO AS PRP ON PRP.PRO_ID = DETALLE_COMBO.PRODUCTO_PRO_ID)
+WHERE MONTH(ORDEN.FECHA) = MONTH(NOW()) AND (P.EMPRESA_EMP_ID = %s OR PRP.EMPRESA_EMP_ID = %s);""",(id_emp,id_emp,))
+        total = cursor.fetchone()[0]
+        return total 
+
+#Controlador para obtener el total de las ventas generadas
+def ObtenerVentasMes():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT SUM(TOTAL) AS TOTAL FROM VENTA WHERE MONTH(FECHA) = MONTH(NOW())""")
+        total = cursor.fetchone()[0]
+        return total
+
+#obtener los productos mas vendidos
+def ObtenerProductosMasVendidos():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT P.PRO_ID, P.NOMBRE, SUM(D.CANTIDAD) AS CANTIDAD 
+        FROM PRODUCTO P INNER JOIN DETALLE_ORDEN D ON P.PRO_ID = D.PRODUCTO_PRO_ID 
+        INNER JOIN ORDEN ON ORDEN.ORD_ID = D.ORDEN_ORD_ID
+        WHERE MONTH(ORDEN.FECHA) = MONTH(now())
+        GROUP BY P.PRO_ID ORDER BY CANTIDAD DESC LIMIT 5; """)
+        productos = cursor.fetchall()
+        return productos
+    
+#obtener los restaurantes que mas pedidos tienen
+def ObtenerRestaurantesMasPedidos():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT E.EMP_ID, E.NOMBRE, COUNT(O.ORD_ID) AS CANTIDAD 
+        FROM EMPRESA E INNER JOIN PRODUCTO P ON E.EMP_ID = P.EMPRESA_EMP_ID 
+        INNER JOIN DETALLE_ORDEN D ON P.PRO_ID = D.PRODUCTO_PRO_ID 
+        INNER JOIN ORDEN O ON D.ORDEN_ORD_ID = O.ORD_ID 
+        WHERE E.TIPO_EMPRESA_T_EMP_ID = 1 AND month(O.FECHA) = month(now())
+        GROUP BY E.EMP_ID ORDER BY CANTIDAD DESC LIMIT 5;""")
+        restaurantes = cursor.fetchall()
+        return restaurantes

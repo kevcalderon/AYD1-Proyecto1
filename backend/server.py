@@ -589,7 +589,12 @@ def EntregarPedidoRepartidor():
         print(resp)
         ord_id = resp['ord_id']
         usuario = resp['user_rep']
+        #cambiar estado
         controlador.EntregarPedidoRepartidor(ord_id, usuario)
+        #conseguir el total de la orden
+        total = controlador.ObtenerTotalOrden(ord_id)
+        #insertar entrada a venta
+        controlador.InsertarVenta(ord_id, total)
         return jsonify({"exito":True, "msj":"Pedido entregado exitosamente"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al marcar el pedido como 'ENTREGADO': " + str(e)}) 
@@ -845,6 +850,59 @@ def RechazarSolicitud(id_sol):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al rechazar las solicitudes: " + str(e)})
 
+#Endpoint para obtener el numero total de pedidos generados en el mes
+@app.route('/VerPedidosMes', methods=['GET'])
+def VerPedidosMes():
+    try:
+        pedidos = controlador.ObtenerPedidosMes()
+        return jsonify({"exito":True, "pedidos":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los pedidos del mes: " + str(e)})
+
+#endpoint para obtener el total de los pedidos por empresa en el mes
+@app.route('/VerPedidosMesEmpresa', methods=['GET'])
+def VerPedidosMesEmpresa():
+    try:
+        pedidos = controlador.ObtenerTotalPedidosMesEmpresa()
+        return jsonify({"exito":True, "pedidos":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los pedidos del mes: " + str(e)})
+
+#endpoint para obtener el conteo de pedidos por empresa en el mes
+@app.route('/VerConteoPedidosMesEmpresa', methods=['GET'])
+def VerConteoPedidosMesEmpresa():
+    try:
+        pedidos = controlador.ObtenerConteoPedidosMesEmpresa()
+        return jsonify({"exito":True, "pedidos":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los pedidos del mes: " + str(e)})
+
+#endpoint para obtener el total de las ventas generadas en el mes
+@app.route('/VerVentasMes', methods=['GET'])
+def VerVentasMes():
+    try:
+        ventas = controlador.ObtenerVentasMes()
+        return jsonify({"exito":True, "ventas":ventas})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las ventas del mes: " + str(e)})
+
+#endpoint para obtener los restaurantes que mas pedidos tienen
+@app.route('/VerRestaurantesMasPedidos', methods=['GET'])
+def VerRestaurantesMasPedidos():
+    try:
+        restaurantes = controlador.ObtenerRestaurantesMasPedidos()
+        return jsonify({"exito":True, "restaurantes":restaurantes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los restaurantes con mas pedidos: " + str(e)})
+
+#endpoint para obtener los productos mas vendidos del mes
+@app.route('/VerProductosMasVendidos', methods=['GET'])
+def VerProductosMasVendidos():
+    try:
+        productos = controlador.ObtenerProductosMasVendidos()
+        return jsonify({"exito":True, "productos":productos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los productos mas vendidos: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
