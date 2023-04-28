@@ -10,7 +10,7 @@ def LoguearCliente(nombre_usuario, contrasenia):
         cursor.execute("""SELECT c.CONTRASENA, c.CLI_ID, c.NOMBRE, c.APELLIDO, c.CORREO, c.TELEFONO, c.USUARIO, c.NIT, c.TARJETA, c.ESTADO, d.DIR_ID, d.LUGAR
                 FROM CLIENTE c
                 INNER JOIN DIRECCION d ON d.DIR_ID = c.DIRECCION_DIR_ID
-                WHERE USUARIO = %s AND ESTADO = 'activo'
+                WHERE USUARIO = %s AND ESTADO = 'ACEPTADO'
                 """, (nombre_usuario,))
         usuario = cursor.fetchone()
         if usuario and check_password_hash(usuario[0], contrasenia):
@@ -42,7 +42,7 @@ def LoguearEmpresa(nombre_empresa, contrasenia):
             te.T_EMP_ID, te.NOMBRE AS NOMBRE_TIPO_EMPRESA, d.DIR_ID, d.LUGAR
             FROM EMPRESA e
             INNER JOIN TIPO_EMPRESA te ON te.T_EMP_ID = e.TIPO_EMPRESA_T_EMP_ID
-            INNER JOIN DIRECCION d ON d.DIR_ID = e.DIRECCION_DIR_ID  WHERE USUARIO = %s AND ESTADO = 'activo'""", (nombre_empresa,))
+            INNER JOIN DIRECCION d ON d.DIR_ID = e.DIRECCION_DIR_ID  WHERE USUARIO = %s AND ESTADO = 'ACEPTADO'""", (nombre_empresa,))
         empresa = cursor.fetchone()
         if empresa and check_password_hash(empresa[0], contrasenia):
             empresa = {
@@ -183,7 +183,7 @@ def AgregarEmpresa(id_direccion, id_tipo_empresa, nombre, descripcion, correo, t
         cursor.execute("""INSERT INTO EMPRESA (DIRECCION_DIR_ID, TIPO_EMPRESA_T_EMP_ID, NOMBRE, DESCRIPCION,
         CORREO, TELEFONO, USUARIO, CONTRASENA, NIT, ESTADO, DOCUMENTO)
         VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-        (id_direccion, id_tipo_empresa, nombre, descripcion, correo, telefono, usuario, password_encriptado, nit, "pendiente", nombre_archivo))
+        (id_direccion, id_tipo_empresa, nombre, descripcion, correo, telefono, usuario, password_encriptado, nit, "PENDIENTE", nombre_archivo))
         empresa_id = cursor.lastrowid
     conexion.commit()
     conexion.close()
@@ -195,7 +195,7 @@ def AgregarSolicitud(id_empresa, id_repartidor,id_dir, tipo_solicitud, fecha, de
     with conexion.cursor() as cursor:
         cursor.execute("""INSERT INTO SOLICITUD
         (EMPRESA_EMP_ID, REPARTIDOR_REP_ID, DIRECCION_DIR_ID, TIPO_SOLICITUD, FECHA, DESCRIPCION, ESTADO)
-        VALUES(%s, %s, %s, %s, %s, %s)""",
+        VALUES(%s, %s, %s, %s, %s, %s, %s)""",
         (id_empresa, id_repartidor, id_dir, tipo_solicitud, fecha, descripcion, estado))
     conexion.commit()
     conexion.close()
@@ -353,7 +353,7 @@ def VerificarSesRepartidor(usuario, contraseña):
     conexion = obtener_conexion()
     usuariosend = None
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT * FROM REPARTIDOR WHERE USUARIO = %s and ESTADO = 'activo'", (usuario,))
+        cursor.execute("SELECT * FROM REPARTIDOR WHERE USUARIO = %s and ESTADO = 'ACEPTADO'", (usuario,))
         usuariosend = cursor.fetchone()
         if not(usuariosend and check_password_hash(usuariosend[7], contraseña)):
             usuariosend = None
@@ -374,7 +374,7 @@ def RegistrarRepartidor(nombre, apellido, usuario, contra, correo, telefono, nit
         id_direccion = cursor.fetchone()[0]
     with conexion.cursor() as cursor:
         cursor.execute('''INSERT INTO REPARTIDOR(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, ESTADO,DOCUMENTO,LICENCIA,TRANSPORTE)
-                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ "pendiente"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
+                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ "PENDIENTE"+"','"+ documento+"','"+ licencia+"','"+ transporte +"')")
         cursor.execute("SELECT LAST_INSERT_ID();")
         id_repartidor = cursor.fetchone()[0]
     conexion.commit()
@@ -402,7 +402,7 @@ def RegistrarCliente(nombre, apellido, usuario, contra, correo, telefono, nit, i
         id_direccion = cursor.fetchone()[0]
     with conexion.cursor() as cursor:
         cursor.execute('''INSERT INTO CLIENTE(DIRECCION_DIR_ID, NOMBRE, APELLIDO, CORREO, TELEFONO,USUARIO, CONTRASENA, NIT, TARJETA, ESTADO)
-                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ tarjeta +"','"+"activo"+"')")
+                          VALUES ('''+ str(id_direccion) +",'"+ nombre+"','"+ apellido+"','"+ correo+"'," +  telefono+",'"+ usuario+"','"+ password_encriptado+"','"+ nit+"','"+ tarjeta +"','"+"ACEPTADO"+"')")
     conexion.commit()
     conexion.close()
 
@@ -518,7 +518,7 @@ def AgregarDetalleOrden(id_combo, id_orden, cantidad, id_producto, observaciones
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         cursor.execute("INSERT INTO DETALLE_ORDEN (COMBO_COM_ID, ORDEN_ORD_ID, PRODUCTO_PRO_ID, CANTIDAD, OBSERVACIONES,ESTADO)" + 
-                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + "pendiente" + "');")
+                          "VALUES (" + str(id_combo) + "," + str(id_orden) + "," + str(id_producto) + "," + str(cantidad) + ",'" + observaciones + "','" + "PENDIENTE" + "');")
     conexion.commit()
     conexion.close()
 
@@ -548,7 +548,7 @@ def AgregarProductoCarrito(id_cliente, id_direccion, id_repartidor,fecha, califi
     id_orden = None
     with conexion.cursor() as cursor:
         cursor.execute("INSERT INTO ORDEN (CLIENTE_CLI_ID, DIRECCION_DIR_ID, REPARTIDOR_REP_ID, FECHA, ESTADO, CALIFICACION, COMENTARIO, METODO_PAGO)" +
-        "VALUES (" + str(id_cliente) + "," + str(id_direccion) + ",NULL , NOW(),'" + "pendiente" + "','" + str(calificacion) + "','" + comentario + "','" + metodo_pago + "');")
+        "VALUES (" + str(id_cliente) + "," + str(id_direccion) + ",NULL , NOW(),'" + "PENDIENTE" + "','" + str(calificacion) + "','" + comentario + "','" + metodo_pago + "');")
         cursor.execute("SELECT LAST_INSERT_ID();")
         id_orden = cursor.fetchone()[0]
     conexion.commit()
@@ -994,7 +994,7 @@ def VerSolicitudesRepartidores():
     with conexion.cursor() as cursor:
         cursor.execute("""SELECT S.SOL_ID, R.REP_ID, R.NOMBRE, R.APELLIDO, R.CORREO, R.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
         INNER JOIN REPARTIDOR R on S.REPARTIDOR_REP_ID = R.REP_ID
-        WHERE S.ESTADO = 'PENDIENTE' AND S.REPARTIDOR_REP_ID != NULL;""")
+        WHERE S.ESTADO = 'PENDIENTE' AND S.REPARTIDOR_REP_ID IS NOT NULL;""")
         lista_solicitudes = []
         solicitudes = cursor.fetchall()
         for solicitud in solicitudes:
@@ -1008,7 +1008,7 @@ def VerSolicitudesEmpresas():
     with conexion.cursor() as cursor:
         cursor.execute("""SELECT S.SOL_ID, E.EMP_ID, E.NOMBRE, E.CORREO, E.TELEFONO, S.DESCRIPCION, S.FECHA, S.TIPO_SOLICITUD FROM SOLICITUD S
         INNER JOIN  EMPRESA E on S.EMPRESA_EMP_ID = E.EMP_ID
-        WHERE S.ESTADO = 'PENDIENTE' AND EMPRESA_EMP_ID != NULL;""")
+        WHERE S.ESTADO = 'PENDIENTE' AND EMPRESA_EMP_ID IS NOT NULL;""")
         lista_solicitudes = []
         solicitudes = cursor.fetchall()
         for solicitud in solicitudes:
