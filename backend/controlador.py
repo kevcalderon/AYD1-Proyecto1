@@ -1283,4 +1283,50 @@ WHERE MONTH(ORDEN.FECHA) = MONTH(NOW()) AND ORDEN.ESTADO = 'ENTREGADO'
 GROUP BY REPARTIDOR.REP_ID;""")
         cantidadES = cursor.fetchall()
         return [{"id":cantidad[0], "nombre":cantidad[1], "apellido":cantidad[2], "direccion":cantidad[3], "correo":cantidad[4], "telefono":cantidad[5], "ganancia":cantidad[6]}for cantidad in cantidadES]
-    
+
+# Controlador para ver los pedidos realizados a una empresa y su total de ventas
+def ObtenerNoPedidosYTotalVentas(id_empresa):
+    conexion = obtener_conexion()
+    registros = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(ORD_ID) AS CANTIDAD_ORDENES, SUM(VENTA) AS VENTA_TOTAL 
+                        FROM (SELECT o.ORD_ID,
+                        SUM(if(do.COMBO_COM_ID IS NULL, do.CANTIDAD, do.CANTIDAD * dc.CANTIDAD) * if(do.COMBO_COM_ID IS NULL, p.PRECIO, c.PRECIO)) AS VENTA
+                        FROM ORDEN o 
+                        INNER JOIN DETALLE_ORDEN do ON do.ORDEN_ORD_ID = o.ORD_ID 
+                        LEFT JOIN PRODUCTO p ON p.PRO_ID = do.PRODUCTO_PRO_ID
+                        LEFT JOIN COMBO c ON c.COM_ID = do.COMBO_COM_ID
+                        LEFT JOIN DETALLE_COMBO dc ON dc.COMBO_COM_ID = c.COM_ID 
+                        LEFT JOIN PRODUCTO p2 ON p2.PRO_ID = dc.PRODUCTO_PRO_ID 
+                        WHERE (p.EMPRESA_EMP_ID = %s OR p2.EMPRESA_EMP_ID = %s) AND o.ESTADO = 'RECIBIDO'
+                        GROUP BY ORD_ID) AS query_final """, (id_empresa, id_empresa, ))
+        registros = cursor.fetchall()
+        registros = [{"CANTIDAD_ORDENES":registro[0], "CANTIDAD_VENTA":registro[1]}for registro in registros]
+    conexion.close()
+    return registros
+
+# Controlador para obtener el top 5 productos mas vendidos
+def Top5ProductosMasVendidos(id_empresa):
+    conexion = obtener_conexion()
+    registros = []
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT PROD_ID, NOMBRE, SUM(CANTIDAD_VENDIDOS) AS CANTIDAD_VENDIDOS
+        FROM (SELECT if(do.COMBO_COM_ID IS NULL, p.PRO_ID, p2.PRO_ID) AS PROD_ID, 
+        if(do.COMBO_COM_ID IS NULL, p.NOMBRE, p2.NOMBRE) AS NOMBRE, 
+        SUM(do.CANTIDAD * if(do.COMBO_COM_ID IS NULL, 1, dc.CANTIDAD)) AS CANTIDAD_VENDIDOS
+        FROM ORDEN o
+        INNER JOIN DETALLE_ORDEN do ON do.ORDEN_ORD_ID = o.ORD_ID 
+        LEFT JOIN PRODUCTO p ON p.PRO_ID = do.PRODUCTO_PRO_ID
+        LEFT JOIN COMBO c ON c.COM_ID = do.COMBO_COM_ID
+        LEFT JOIN DETALLE_COMBO dc ON dc.COMBO_COM_ID = c.COM_ID 
+        LEFT JOIN PRODUCTO p2 ON p2.PRO_ID = dc.PRODUCTO_PRO_ID
+        WHERE (p.EMPRESA_EMP_ID = %s OR p2.EMPRESA_EMP_ID = %s) AND o.ESTADO = 'RECIBIDO'
+        GROUP BY p.PRO_ID, p2.PRO_ID) AS query_final
+        GROUP BY PROD_ID
+        ORDER BY CANTIDAD_VENDIDOS DESC
+        Limit 5 """, (id_empresa, id_empresa, ))
+        registros = cursor.fetchall()
+        registros = [{"PROD_ID":registro[0], "NOMBRE":registro[1], "CANTIDAD_VENDIDOS":registro[2]}for registro in registros]
+    conexion.close()
+    return registros
+
