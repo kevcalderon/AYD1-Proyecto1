@@ -984,7 +984,24 @@ def VerGananciasRepartidorMes():
         return jsonify({"exito":True, "repartidores":repartidores})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar las ganancias de los repartidores: " + str(e)})
-    
+
+#Endpoint para ver los pedidos realizados a una empresa y su total de ventas
+@app.route('/obtenerNoPedidosYTotalVentas/<id_empresa>', methods=['GET'])
+def ObtenerNoPedidosYTotalVentas(id_empresa):
+    try:
+        info = controlador.ObtenerNoPedidosYTotalVentas(id_empresa)
+        return jsonify({"exito":True, "msg":info})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar la informacion: " + str(e)})
+
+#Endpoint para ver el top 5 de los productos mas vendidos
+@app.route('/top5ProductosMasVendidos/<id_empresa>', methods=['GET'])
+def Top5ProductosMasVendidos(id_empresa):
+    try:
+        info = controlador.Top5ProductosMasVendidos(id_empresa)
+        return jsonify({"exito":True, "msg":info})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar la informacion: " + str(e)})
 
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
