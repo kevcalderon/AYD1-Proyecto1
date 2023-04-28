@@ -904,6 +904,51 @@ def VerProductosMasVendidos():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los productos mas vendidos: " + str(e)})
 
+#endpoint para obtener la cantidad de clientes registrados
+@app.route('/VerCantidadClientes', methods=['GET'])
+def VerCantidadClientes():
+    try:
+        clientes = controlador.ObtenerClientesRegistrados()
+        return jsonify({"exito":True, "clientes":clientes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar la cantidad de clientes: " + str(e)})
+
+#endpoint para obtener los clientes que han realizado compras el ultimo mes
+@app.route('/VerClientesComprasMes', methods=['GET'])
+def VerClientesUltimoMes():
+    try:
+        clientes = controlador.ObtenerClientesComprasMes()
+        return jsonify({"exito":True, "clientes":clientes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los clientes que han realizado compras el ultimo mes: " + str(e)})
+    
+#endpoint para obtener las empresas que fueron aprobadas por el administrador el ultimo mes
+@app.route('/VerEmpresasAprobadasMes', methods=['GET'])
+def VerEmpresasAprobadasMes():
+    try:
+        empresas = controlador.ObtenerEmpresasAprobadasMes()
+        return jsonify({"exito":True, "empresas":empresas})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las empresas que fueron aprobadas el ultimo mes: " + str(e)})
+
+#endpoint para obtener los repartidores que fueron aprobados por el administrador el ultimo mes
+@app.route('/VerRepartidoresAprobadosMes', methods=['GET'])
+def VerRepartidoresAprobadosMes():
+    try:
+        repartidores = controlador.ObtenerRepartidoresAprobadosMes()
+        return jsonify({"exito":True, "repartidores":repartidores})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los repartidores que fueron aprobados el ultimo mes: " + str(e)})
+
+#endpoint para obtener los clientes que mas compran en el mes
+@app.route('/VerClientesMasCompras', methods=['GET'])
+def VerClientesMasCompras():
+    try:
+        clientes = controlador.ObtenerClientesMasCompras()
+        return jsonify({"exito":True, "clientes":clientes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los clientes que mas compran en el mes: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 

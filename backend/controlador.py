@@ -1191,3 +1191,53 @@ def ObtenerRestaurantesMasPedidos():
         GROUP BY E.EMP_ID ORDER BY CANTIDAD DESC LIMIT 5;""")
         restaurantes = cursor.fetchall()
         return restaurantes
+    
+#controlador para obtener la cantidad de clientes registrados
+def ObtenerClientesRegistrados():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(CLI_ID) AS CANTIDAD FROM CLIENTE WHERE ESTADO = 'ACEPTADO'""")
+        cantidad = cursor.fetchone()[0]
+        return cantidad
+    
+#Obtener los clientes que han realizado compras el ultimo mes
+def ObtenerClientesComprasMes():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT CLI_ID, C.NOMBRE, C.APELLIDO, C.DIRECCION_DIR_ID ,C.CORREO, C.TELEFONO, C.NIT FROM CLIENTE C 
+        INNER JOIN ORDEN O ON C.CLI_ID = O.CLIENTE_CLI_ID
+        WHERE MONTH(O.FECHA) = MONTH(NOW());""")
+        cantidadES = cursor.fetchall()
+        return [{"id":cantidad[0], "nombre":cantidad[1], "apellido":cantidad[2], "direccion":cantidad[3], "correo":cantidad[4], "telefono":cantidad[5], "nit":cantidad[6]}for cantidad in cantidadES]
+    
+#obtener las empresas que fueron aprobadas por el administrador el ultimo mes
+def ObtenerEmpresasAprobadasMes():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT EMP_ID, NOMBRE, EMPRESA.DIRECCION_DIR_ID, CORREO, TELEFONO 
+FROM EMPRESA INNER JOIN SOLICITUD ON SOLICITUD.EMPRESA_EMP_ID = EMPRESA.EMP_ID
+WHERE SOLICITUD.ESTADO = 'ACEPTADO' AND MONTH(FECHA) = MONTH(NOW());""")
+        cantidadES = cursor.fetchall()
+        return [{"id":cantidad[0], "nombre":cantidad[1], "direccion":cantidad[2], "correo":cantidad[3], "telefono":cantidad[4]}for cantidad in cantidadES]
+
+#obtener los repartidores que fueron aprobados por el administrador el ultimo mes
+def ObtenerRepartidoresAprobadosMes():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT REPARTIDOR.REP_ID, NOMBRE, APELLIDO, REPARTIDOR.DIRECCION_DIR_ID, CORREO, TELEFONO
+FROM REPARTIDOR INNER JOIN SOLICITUD ON SOLICITUD.REPARTIDOR_REP_ID = REPARTIDOR.REP_ID
+WHERE SOLICITUD.ESTADO = 'ACEPTADO' AND MONTH(FECHA) = MONTH(NOW());""")
+        cantidadES = cursor.fetchall()
+        return [{"id":cantidad[0], "nombre":cantidad[1], "apellido":cantidad[2], "direccion":cantidad[3], "correo":cantidad[4], "telefono":cantidad[5]}for cantidad in cantidadES]
+
+#obtener los clientes que mas compras realizan
+def ObtenerClientesMasCompras():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT C.CLI_ID, C.NOMBRE, C.APELLIDO, C.DIRECCION_DIR_ID ,C.CORREO, C.TELEFONO, C.NIT, COUNT(O.ORD_ID) AS CANTIDAD 
+        FROM CLIENTE C INNER JOIN ORDEN O ON C.CLI_ID = O.CLIENTE_CLI_ID
+     
+        GROUP BY C.CLI_ID ORDER BY CANTIDAD DESC LIMIT 5;""")
+        cantidadES = cursor.fetchall()
+        return [{"id":cantidad[0], "nombre":cantidad[1], "apellido":cantidad[2], "direccion":cantidad[3], "correo":cantidad[4], "telefono":cantidad[5], "nit":cantidad[6], "cantidad":cantidad[7]}for cantidad in cantidadES]
+    
