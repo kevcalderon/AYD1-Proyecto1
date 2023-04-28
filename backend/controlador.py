@@ -1241,3 +1241,46 @@ def ObtenerClientesMasCompras():
         cantidadES = cursor.fetchall()
         return [{"id":cantidad[0], "nombre":cantidad[1], "apellido":cantidad[2], "direccion":cantidad[3], "correo":cantidad[4], "telefono":cantidad[5], "nit":cantidad[6], "cantidad":cantidad[7]}for cantidad in cantidadES]
     
+#obtener el numero total de pedidos entregados en el mes
+def ObtenerPedidosEntregadosMes():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(ORD_ID) AS CANTIDAD FROM ORDEN WHERE ESTADO = 'ENTREGADO' AND MONTH(FECHA) = MONTH(NOW());""")
+        cantidad = cursor.fetchone()[0]
+        return cantidad
+    
+#obtener el promedio de tiempo que le toma a un repartidor entregar un pedido por mes
+def ObtenerPromedioTiempoEntrega():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""select AVG(TIMESTAMPDIFF(HOUR, O.FECHA, VENTA.FECHA)) AS PROMEDIO_HORAS_REPARTIDOR 
+FROM VENTA inner join ORDEN as O ON O.ORD_ID = VENTA.ORDEN_ORD_ID 
+WHERE MONTH(O.FECHA) = MONTH(NOW()) AND O.ESTADO = 'ENTREGADO';""")
+        cantidad = cursor.fetchone()[0]
+        return cantidad
+    
+#obtener la calificacion promedio que tiene cada repartidor por mes
+def ObtenerCalificacionPromedioRepartidor():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT REPARTIDOR.REP_ID, NOMBRE, APELLIDO, REPARTIDOR.DIRECCION_DIR_ID, CORREO, TELEFONO, AVG(CALIFICACION) AS CALIFICACION
+FROM REPARTIDOR INNER JOIN ORDEN ON REPARTIDOR.REP_ID = ORDEN.REPARTIDOR_REP_ID
+INNER JOIN VENTA ON ORDEN.ORD_ID = VENTA.ORDEN_ORD_ID
+WHERE MONTH(ORDEN.FECHA) = MONTH(NOW()) AND ORDEN.ESTADO = 'ENTREGADO'
+GROUP BY REPARTIDOR.REP_ID;""")
+        cantidadES = cursor.fetchall()
+        return [{"id":cantidad[0], "nombre":cantidad[1], "apellido":cantidad[2], "direccion":cantidad[3], "correo":cantidad[4], "telefono":cantidad[5], "calificacion":cantidad[6]}for cantidad in cantidadES]
+
+    
+#obtener las ganancias de cada repartidor en un mes
+def ObtenerGananciasRepartidorMes():
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT REPARTIDOR.REP_ID, NOMBRE, APELLIDO, REPARTIDOR.DIRECCION_DIR_ID, CORREO, TELEFONO, SUM(VENTA.TOTAL) AS GANANCIA
+FROM REPARTIDOR INNER JOIN ORDEN ON REPARTIDOR.REP_ID = ORDEN.REPARTIDOR_REP_ID
+INNER JOIN VENTA ON ORDEN.ORD_ID = VENTA.ORDEN_ORD_ID
+WHERE MONTH(ORDEN.FECHA) = MONTH(NOW()) AND ORDEN.ESTADO = 'ENTREGADO'
+GROUP BY REPARTIDOR.REP_ID;""")
+        cantidadES = cursor.fetchall()
+        return [{"id":cantidad[0], "nombre":cantidad[1], "apellido":cantidad[2], "direccion":cantidad[3], "correo":cantidad[4], "telefono":cantidad[5], "ganancia":cantidad[6]}for cantidad in cantidadES]
+    

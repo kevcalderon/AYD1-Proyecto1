@@ -949,6 +949,43 @@ def VerClientesMasCompras():
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar los clientes que mas compran en el mes: " + str(e)})
 
+#endpoint para obtener el numero total de pedidos entregados en el mes
+@app.route('/VerPedidosEntregadosMes', methods=['GET'])
+def VerPedidosEntregadosMes():
+    try:
+        pedidos = controlador.ObtenerPedidosEntregadosMes()
+        return jsonify({"exito":True, "pedidos":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los pedidos entregados en el mes: " + str(e)})
+    
+#endpoint para obtener el promedio de tiempo que le toma a un repartidor entregar un pedido por mes
+@app.route('/VerPromedioTiempoEntrega', methods=['GET'])
+def VerPromedioTiempoEntrega():
+    try:
+        pedidos = controlador.ObtenerPromedioTiempoEntrega()
+        return jsonify({"exito":True, "pedidos":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar el promedio de tiempo de entrega: " + str(e)})
+
+#endpoint para obtener la calificacion promedio que tiene cada repartidor por mes
+@app.route('/VerPromedioCalificacionRepartidor', methods=['GET'])
+def VerPromedioCalificacionRepartidor():
+    try:
+        repartidores = controlador.ObtenerPromedioCalificacionRepartidor()
+        return jsonify({"exito":True, "repartidores":repartidores})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar el promedio de calificacion de los repartidores: " + str(e)})
+    
+#endpoint para obtener las ganancias de cada repartidor en un mes
+@app.route('/VerGananciasRepartidorMes', methods=['GET'])
+def VerGananciasRepartidorMes():
+    try:
+        repartidores = controlador.ObtenerGananciasRepartidorMes()
+        return jsonify({"exito":True, "repartidores":repartidores})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar las ganancias de los repartidores: " + str(e)})
+    
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
