@@ -17,17 +17,17 @@ export const getMunicipios = async () => {
 };
 
 export const getDepartamentoPorMunicipio = async ({ queryKey }) => {
-  console.log(queryKey[1]);
-  const response = await fetch( `${API_URL}/mostrarMunicipios/${queryKey[1].DEP_ID}`, {
-      method: "GET",
-      headers: { "Content-type": "application/json; charset=UTF-8" },
-    }
-  );
+  console.log(queryKey[1])
+  const response = await fetch(`${API_URL}/mostrarMunicipios/${queryKey[1]}`, {
+    method: "GET",
+    headers: { "Content-type": "application/json; charset=UTF-8" },
+  });
 
   if (!response.ok) {
     throw new Error("Eror al obtener los municpios");
   }
 
   const data = await response.json();
+  console.log(data)
   return data;
 };

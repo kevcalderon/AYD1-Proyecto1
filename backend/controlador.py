@@ -1,3 +1,4 @@
+from types import new_class
 from conexion import obtener_conexion
 from werkzeug.security import check_password_hash, generate_password_hash
 import json
@@ -810,15 +811,15 @@ def VerCombosPorTipo(tipo):
 def VerPerfilRepartidor(usuario, mes):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT R.NOMBRE, R.APELLIDO, R.USUARIO, R.CONTRASENA, R.CORREO, R.NIT, D2.NOMBRE, M.NOMBRE, D.LUGAR, R.LICENCIA, R.TRANSPORTE, R.DOCUMENTO FROM REPARTIDOR R
+        cursor.execute("""SELECT R.NOMBRE, R.APELLIDO, R.USUARIO, R.CORREO, R.NIT, D2.DEP_ID, M.MUN_ID, D.LUGAR, R.LICENCIA, R.TRANSPORTE, R.DOCUMENTO, R.TELEFONO FROM REPARTIDOR R
         INNER JOIN DIRECCION D on R.DIRECCION_DIR_ID = D.DIR_ID
         INNER JOIN MUNICIPIO M on D.MUNICIPIO_MUN_ID = M.MUN_ID
         INNER JOIN DEPARTAMENTO D2 on M.DEPARTAMENTO_DEP_ID = D2.DEP_ID
-        WHERE R.USUARIO =%s """,(usuario,))
-        logueado = cursor.fetchone()[0]
+        WHERE R.REP_ID =%s """,(usuario,))
+        logueado = cursor.fetchone()
         calificacion = VerCalificacionPromedioRepartidor(usuario, mes)
         comision = VerComisionRepartidor(usuario, mes)
-        new_user = {"NOMBRE":logueado[0], "APELLIDO":logueado[1], "USUARIO":logueado[2], "CONTRASENA":logueado[3], "CORREO":logueado[4], "NIT":logueado[5], "DEPARTAMENTO":logueado[6], "MUNICIPIO":logueado[7], "LUGAR":logueado[8], "LICENCIA":logueado[9], "TRANSPORTE":logueado[10],"DOCUMENTO":logueado[11],"CALIFICACION":calificacion, "COMISION":comision}
+        new_user = {"NOMBRE":logueado[0], "APELLIDO":logueado[1], "USUARIO":logueado[2], "CORREO":logueado[3], "NIT":logueado[4], "ID_DEP":logueado[5], "ID_MUNI":logueado[6], "LUGAR":logueado[7], "LICENCIA":logueado[8], "TRANSPORTE":logueado[9],"DOCUMENTO":logueado[10],"TELEFONO": logueado[11], "CALIFICACION":calificacion, "COMISION":comision}
         conexion.close()
         return new_user
        
@@ -828,10 +829,12 @@ def VerCalificacionPromedioRepartidor(usuario, mes):
     with conexion.cursor() as cursor:
         cursor.execute("""SELECT AVG(O.CALIFICACION) FROM ORDEN O
         INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
-        WHERE R.USUARIO = %s AND MONTH(O.FECHA) = %s;""",(usuario,mes))
-        valor = cursor.fetchone()[0]
+        WHERE R.REP_ID = %s AND MONTH(O.FECHA) = %s;""",(usuario,mes,))
+        valor = cursor.fetchone()
         conexion.close()
-        return valor
+        if valor[0] == None:
+            return 0
+        return valor[0]
     
 #Controlador para ver las comisiones generadas en el mes del repartidor logueado
 def VerComisionRepartidor(usuario, mes):
@@ -840,10 +843,13 @@ def VerComisionRepartidor(usuario, mes):
         cursor.execute("""SELECT SUM(V.TOTAL)*0.05 AS COMISION FROM VENTA V
         INNER JOIN ORDEN O on V.ORDEN_ORD_ID = O.ORD_ID
         INNER JOIN REPARTIDOR R on O.REPARTIDOR_REP_ID = R.REP_ID
-        WHERE R.USUARIO =%s AND MONTH(V.FECHA) = %s""", (usuario, mes)) 
-        valor = cursor.fetchone()[0]
+        WHERE R.REP_ID =%s AND MONTH(V.FECHA) = %s""", (usuario, mes,)) 
+        valor = cursor.fetchone()
         conexion.close()
-        return valor
+        if valor[0]: 
+            return valor[0]
+        else: 
+            return 0 
 
 def VerOrdenesCliente(id_cliente):
     conexion = obtener_conexion()
@@ -869,20 +875,33 @@ def ActualizarOrden(id_orden, comentario, calificacion):
         return True
     
     #Controlador para actualizar los datos del repartidor
-def ActualizarPerfilRepartidor(correo,contrasena, nit, telefono, transporte, licencia, documento,usuario):
+def ActualizarPerfilRepartidor(correo,contrasena, nit, telefono, transporte, licencia,usuario):
     conexion = obtener_conexion()
+
     with conexion.cursor() as cursor:
-        cursor.execute("""UPDATE REPARTIDOR R
-        INNER JOIN DIRECCION D on R.DIRECCION_DIR_ID = D.DIR_ID
-        SET R.CORREO = %s,
-        R.CONTRASENA = %s,
-        R.NIT = %s,
-        R.TELEFONO = %s,
-        R.TRANSPORTE = %s,
-        R.LICENCIA =%s,
-        R.DOCUMENTO = %s
-        WHERE R.USUARIO =%s;""",(correo,contrasena, nit, telefono, transporte, licencia, documento,usuario))
-        conexion.commit()
+        if contrasena:
+            password_encriptado = generate_password_hash(contrasena, "sha256", 30)
+            query = """UPDATE REPARTIDOR R
+            SET R.CORREO = %s,
+            R.CONTRASENA = %s,
+            R.NIT = %s,
+            R.TELEFONO = %s,
+            R.TRANSPORTE = %s,
+            R.LICENCIA =%s
+            WHERE R.USUARIO =%s""" 
+            cursor.execute(query,(correo,password_encriptado, nit, telefono, transporte, licencia,usuario,))
+            conexion.commit()
+        else:
+            query = """UPDATE REPARTIDOR R
+            SET CORREO = %s,
+            NIT = %s,
+            TELEFONO = %s,
+            TRANSPORTE = %s,
+            LICENCIA =%s
+            WHERE USUARIO = %s"""
+            cursor.execute(query,(correo, nit, telefono, transporte, licencia,usuario,))
+            conexion.commit()
+
         conexion.close()
 
 #Controlador para ver todos los pedidos entregados por el repartidor con sesion activa

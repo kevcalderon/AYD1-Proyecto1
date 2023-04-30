@@ -644,6 +644,7 @@ def VerPerfilRepartidor(usuario):
         perfil = controlador.VerPerfilRepartidor(usuario, mes_actual)
         return jsonify({"exito":True, "repartidor":perfil})
     except Exception as e:
+        print(e)
         return jsonify({'exito':False, "msg": "Error al mostar los datos del repartidor logueado: " + str(e)})
 
 @app.route('/VerOrdenesCliente/<id_cliente>', methods=['GET'])
@@ -670,23 +671,15 @@ def ActualizarComentarioCalificacionOrden():
 @app.route('/ActualizarPerfilRepartidor/<usuario>', methods=['PUT'])
 def ActualizarPerfilRepartidor(usuario):
     try:
+        print(usuario)
         data = request.json
-        correo = data[0]
-        contrasena = data[1]
-        nit = data[2]
-        telefono = data[3]
-        transporte = data[4]
-        licencia = data[5]
-        nombre_archivo = None
-        if('documento' in request.files):
-            documento = request.files['documento']
-            filename = secure_filename(documento.filename)
-            if(not archivo_permitido(filename)):
-                return jsonify({"exito":False, "msg":"La extensión del archivo no esta permitido"})
-            hora_actual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") # Obtiene la hora actual como una cadena en el formato "YYYY-MM-DD-HH-MM-SS"
-            nombre_archivo = hora_actual + '_' + filename # Concatena la hora actual y el nombre de archivo original
-            documento.save(os.path.join(app.config['UPLOAD_FOLDER'], nombre_archivo))
-        controlador.ActualizarPerfilRepartidor(correo, contrasena, nit, telefono, transporte, licencia, nombre_archivo, usuario)
+        correo = data['correo']
+        contrasena = data['contra']
+        nit = data['nit']
+        telefono = data['telefono']
+        transporte = data['transporte']
+        licencia = data['licencia']
+        controlador.ActualizarPerfilRepartidor(correo, contrasena, nit, telefono, transporte, licencia, usuario)
         return jsonify({'exito':True, "msj": "Se actualizo correctamente el perfil del repartidor"})
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al modificar los datos del repartidor logueado: " + str(e)})
