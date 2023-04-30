@@ -9,6 +9,7 @@ const FormInput = ({
   register,
   type,
   props = null,
+  required = false,
 }) => {
   return (
     <Form.Group className="w-100" controlId={controlId}>
@@ -21,6 +22,7 @@ const FormInput = ({
           {...props}
           isInvalid={!!errors[name]}
           size="sm"
+          required={required}
         />
       </FloatingLabel>
       {!!errors[name] && (

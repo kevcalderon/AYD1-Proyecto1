@@ -1,14 +1,15 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo, useState } from "react";
-import { Backdrop, Button, CircularProgress, IconButton } from "@mui/material";
+import { Backdrop, Button, CircularProgress, MenuItem } from "@mui/material";
 import FormInput from "../../form-input/FormInput";
 import validationSchema from "./RegistroSchema";
-import AutoCompleteForm from "../../autocomplete/Autocomplete";
 import { getDepartamentoPorMunicipio } from "../../../services/municipios";
 import { useQuery } from "react-query";
 import ShowError from "../../showError/ShowError";
 import { Form } from "react-bootstrap";
+import SelectForm from "../../select-form/SelectForm";
+import { getDepartamentos } from "../../../services/departamentos";
+import { useEffect } from "react";
 
 const licencias = [
   {
@@ -25,7 +26,7 @@ const licencias = [
   },
 ];
 
-const tieneLicencia = [
+const transporte = [
   {
     id: 1,
     value: "true",
@@ -36,7 +37,7 @@ const tieneLicencia = [
   },
 ];
 
-const RegistroFrom = ({ departamentos, onSubmitForm }) => {
+const RegistroFrom = ({ onSubmitForm, initialValue = undefined }) => {
   const methods = useForm({
     resolver: zodResolver(validationSchema),
   });
@@ -47,36 +48,52 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
     handleSubmit,
     register,
     watch,
+    setValue,
     formState: { isSubmitSuccessful, errors },
   } = methods;
 
-  const departamento = watch("departamento", -1);
-  const [documentError, setDocumentError] = useState(false);
-  const [documento, setDocumento] = useState();
-  const [mustFetchMunicipios, setMustFetchMunicipios] = useState(false);
-  const [municipios, setMunicipios] = useState([]);
+  const departamento = watch("id_dep", -1);
+  const rawDepartamentos = useQuery("get-departamentos", getDepartamentos, {
+    staleTime: 30000,
+  });
   const rawMunicipios = useQuery(
     ["get-municpios-by-departamento", departamento],
     getDepartamentoPorMunicipio,
     {
-      enabled: mustFetchMunicipios,
+      enabled: departamento !== -1,
     }
   );
 
-  useMemo(() => {
-    setMunicipios(rawMunicipios.data);
-  }, [rawMunicipios.data]);
-
   useEffect(() => {
-    setMustFetchMunicipios(true);
-  }, [departamento]);
+    if (initialValue) {
+      console.log(initialValue);
+      setValue("nombre", initialValue.NOMBRE);
+      setValue("apellido", initialValue.APELLIDO);
+      setValue("usuario", initialValue.USUARIO);
+      setValue("contra", initialValue.CONTRASENA);
+      setValue("correo", initialValue.CORREO);
+      setValue("telefono", initialValue.TELEFONO);
+      setValue("nit", initialValue.NIT);
+      setValue("id_dep", initialValue.ID_DEP);
+      setValue("id_muni", initialValue.ID_MUNI);
+      setValue("lugar", initialValue.LUGAR);
+      setValue("licencia", initialValue.LICENCIA);
+      setValue("transporte", initialValue.TRANSPORTE);
+    }
+  }, []);
 
-  useEffect(() => {
-    setMustFetchMunicipios(false);
-  }, [municipios]);
+  if (rawDepartamentos.isLoading) {
+    return (
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={rawDepartamentos.isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    );
+  }
 
-  if (rawMunicipios.isError) {
-    console.log(rawMunicipios);
+  if (rawMunicipios.isError || rawDepartamentos.isError) {
     return (
       <ShowError
         title="Error"
@@ -88,7 +105,6 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
 
   const onSubmit = async (values) => {
     if (isSubmitSuccessful) {
-      setDocumento(undefined);
       reset();
     }
 
@@ -132,6 +148,7 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
                 name="contra"
                 controlId="contraseña"
                 type="password"
+                required={!initialValue  ? true : false}
                 register={register}
               />
               <FormInput
@@ -160,36 +177,44 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
                 type="text"
                 register={register}
               />
-              <AutoCompleteForm
+
+              <SelectForm
                 control={control}
-                options={departamentos}
-                getOptionLabel={(opt) => `${opt.NOMBRE}`}
-                isOptionEqualToValue={(opt, value) =>
-                  opt.NOMBRE === value.NOMBRE
-                }
-                renderOptions={(opt) => opt.NOMBRE}
-                getKey={(opt) => opt.DEP_ID}
+                required={true}
                 errors={errors}
-                name="departamento"
+                register={register}
+                name="id_dep"
                 label="Departamento"
-                classname="mb-2"
-              />
+                props={{ sx: { mb: "8px" } }}
+                defaultValue={1}
+              >
+                {rawDepartamentos.data.map((d) => (
+                  <MenuItem key={d.DEP_ID} value={d.DEP_ID}>
+                    {d.NOMBRE}
+                  </MenuItem>
+                ))}
+              </SelectForm>
+
               {rawMunicipios.data && (
-                <AutoCompleteForm
+                <SelectForm
                   control={control}
-                  options={municipios}
-                  getOptionLabel={(opt) => `${opt.NOMBRE_MUNICIPIO}`}
-                  isOptionEqualToValue={(opt, value) =>
-                    opt.NOMBRE_MUNICIPIO === value.NOMBRE_MUNICIPIO
-                  }
-                  renderOptions={(opt) => opt.NOMBRE_MUNICIPIO}
-                  getKey={(opt) => opt.MUN_ID}
+                  required={true}
                   errors={errors}
-                  name="municipio"
-                  label="Municipios"
-                  classname="mb-2"
-                />
+                  register={register}
+                  name="id_muni"
+                  label="municipio"
+                  props={{ sx: { mb: "8px" } }}
+                >
+                  {rawMunicipios.data.map((d) => {
+                    return (
+                      <MenuItem key={d.MUN_ID} value={d.MUN_ID}>
+                        {d.NOMBRE_MUNICIPIO}
+                      </MenuItem>
+                    );
+                  })}
+                </SelectForm>
               )}
+
               <FormInput
                 placeholder="Lugar"
                 errors={errors}
@@ -198,40 +223,45 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
                 type="text"
                 register={register}
               />
-              <AutoCompleteForm
+              <SelectForm
                 control={control}
-                options={licencias}
-                getOptionLabel={(opt) => `${opt.name}`}
-                isOptionEqualToValue={(opt, value) => opt.name === value.name}
-                renderOptions={(opt) => opt.name}
-                getKey={(opt) => opt.id}
+                required={true}
                 errors={errors}
+                register={register}
                 name="licencia"
-                label="Licencia"
-                classname="mb-2"
-              />
-              <AutoCompleteForm
+                label="Tipo de Licencia"
+                props={{ sx: { mb: "8px" } }}
+              >
+                {licencias.map((d) => {
+                  return (
+                    <MenuItem key={d.name} value={d.name}>
+                      {d.name}
+                    </MenuItem>
+                  );
+                })}
+              </SelectForm>
+              <SelectForm
                 control={control}
-                options={tieneLicencia}
-                getOptionLabel={(opt) => `${opt.value}`}
-                isOptionEqualToValue={(opt, value) => opt.value === value.value}
-                renderOptions={(opt) => opt.value}
-                getKey={(opt) => opt.id}
+                required={true}
                 errors={errors}
+                register={register}
                 name="transporte"
-                label="Transporte"
-                classname="mb-2"
-              />
+                label="Posee Transporte"
+                props={{ sx: { mb: "8px" } }}
+              >
+                {transporte.map((d) => {
+                  return (
+                    <MenuItem key={d.value} value={d.value}>
+                      {d.value}
+                    </MenuItem>
+                  );
+                })}
+              </SelectForm>
               <span>
                 <Form.Group controlId="formFile" className="mb-3">
                   <Form.Label>Documento</Form.Label>
                   <Form.Control type="file" {...register("documento")} />
                 </Form.Group>
-                {documentError && (
-                  <small className="text-red-600">
-                    El documento es un campo obligatorio
-                  </small>
-                )}
               </span>
             </div>
             <Button
@@ -239,7 +269,7 @@ const RegistroFrom = ({ departamentos, onSubmitForm }) => {
               type="submit"
               variant="contained"
             >
-              Registrar
+              {initialValue ? 'Actualizar': 'Registrar'}
             </Button>
           </div>
         </form>
