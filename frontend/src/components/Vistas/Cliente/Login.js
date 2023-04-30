@@ -1,49 +1,53 @@
-import { React, useState } from 'react'
+import { React, useState } from "react";
 import NavBar from "../../Navbars/NavbarU";
-import { Form, Button } from 'react-bootstrap';
-import { Icon } from '@iconify/react';
-import IconoLogin from '@iconify-icons/mdi/login';
+import { Form, Button } from "react-bootstrap";
+import { Icon } from "@iconify/react";
+import IconoLogin from "@iconify-icons/mdi/login";
 import API_URL from "../../../app/constants";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const [usuario, setUsuario] = useState('');
-  const [password, setPassword] = useState('');
+  const [usuario, setUsuario] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
-    await fetch(
-      `${API_URL}/loguearCliente/${usuario}/${password}`,
-      {
+    try {
+      await fetch(`${API_URL}/loguearCliente/${usuario}/${password}`, {
         method: "GET",
-      }
-    )
-      .then((response) => response.json())
-      .then((res) => {
-        console.log(res);
-        if (res.respuesta !== null) {
-          const clienteJSON = JSON.stringify(res.respuesta);
-          localStorage.setItem("cliente", clienteJSON);
-          console.log(res);
-          navigate("/Empresas");
-        } else {
-          alert("Usuario o contraseña incorrectos");
-        }
       })
-      .catch((error) => {
-        console.log(error);
-      });
-
+        .then((response) => response.json())
+        .then((res) => {
+          console.log(res);
+          if (res.respuesta !== null) {
+            const clienteJSON = JSON.stringify(res.respuesta);
+            localStorage.setItem("cliente", clienteJSON);
+            console.log(res);
+            navigate("/Empresas");
+            localStorage.removeItem("carrito");
+          } else {
+            alert("Usuario o contraseña incorrectos");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <>
       <NavBar />
-      <div className="d-flex flex-column align-items-center" style={{ color: "white" }}>
+      <div
+        className="d-flex flex-column align-items-center"
+        style={{ color: "white" }}
+      >
         <div className="mt-3">
-          <Icon icon={IconoLogin} style={{ fontSize: '3rem' }} />
+          <Icon icon={IconoLogin} style={{ fontSize: "3rem" }} />
           <h2 className="mt-3">LOGIN</h2>
         </div>
         <Form onSubmit={handleLogin} className="mt-4">
@@ -73,7 +77,7 @@ function Login() {
         </Form>
       </div>
     </>
-  )
+  );
 }
 
-export default Login
+export default Login;
