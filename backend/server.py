@@ -10,7 +10,7 @@ import json
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-app.config['UPLOAD_FOLDER'] = '../public'
+app.config['UPLOAD_FOLDER'] = './public'
 ALLOWED_EXTENSIONS = set(['png','svg','jpg','pdf'])
 
 @app.route('/', methods=['GET'])
@@ -1000,4 +1000,4 @@ if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
     # serve(app, port=5000)
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -16,6 +16,39 @@ services:
     volumes:
       - mysql-vol:/var/lib/mysql
       - ./database/database_init.sql:/docker-entrypoint-initdb.d/database_init.sql
+  
+  backend:
+    depends_on:
+        - mysqldb
+    restart: on-failure
+    container_name: backend
+    image: carlosmz87/proyecto_ayd1_backend
+    build: ./backend
+    ports:
+      - "5000:5000"
+    networks:
+      - app_net
+    links:
+      - mysqldb
+    environment:
+      - DATABASE_USER=proyecto
+      - DATABASE_PASSWORD=proyecto
+      - DATABASE_HOST=mysqldb
+      - DATABASE_NAME=proyecto_db
+      - DATABASE_PORT=3306
+
+  frontend:
+    depends_on:
+      - backend
+    container_name: frontend
+    image: carlosmz87/proyecto_ayd1_frontend
+    build: ./frontend
+    ports:
+      - "3000:80"
+    networks:
+      - app_net
+    links:
+      - backend
 
 networks:
   app_net:
