@@ -22,8 +22,8 @@ services:
         - mysqldb
     restart: on-failure
     container_name: backend
-    image: carlosmz87/proyecto_ayd1_backend
     build: ./backend
+    image: carlosmz87/proyecto_ayd1_backend:latest
     ports:
       - "5000:5000"
     networks:
@@ -41,8 +41,8 @@ services:
     depends_on:
       - backend
     container_name: frontend
-    image: carlosmz87/proyecto_ayd1_frontend
     build: ./frontend
+    image: carlosmz87/proyecto_ayd1_frontend:latest
     ports:
       - "3000:80"
     networks:
