@@ -109,6 +109,8 @@ function MisPedidos() {
 
 
 
+
+
   return (
     <div style={{ color: 'black' }}>
       <NavbarC />
@@ -143,7 +145,7 @@ function MisPedidos() {
                 <td>{order.ESTADO}</td>
                 <td>
                   {
-                    order.CALIFICACION === null || order.CALIFICACION === undefined ? (
+                    order.CALIFICACION === null || order.CALIFICACION === 0 ? (
                       order.ESTADO !== undefined ? (
                         order.ESTADO.toLowerCase() === "entregado" || order.ESTADO.toLowerCase() === "entregada" ? (
                           <Button variant="success" onClick={() => handleOpenModal(order)}>

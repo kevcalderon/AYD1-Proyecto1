@@ -47,7 +47,10 @@ function MiPedido() {
 
   const handleMarkAsComplete = async () => {
     try {
-      marcarComoEntregado(rawPedido.data.pedidos.ORD_ID, JSON.parse(id_repartidor));
+      marcarComoEntregado(
+        rawPedido.data.pedidos.ORD_ID,
+        JSON.parse(id_repartidor)
+      );
 
       rawPedido.refetch();
     } catch (error) {
@@ -62,7 +65,9 @@ function MiPedido() {
         <div className="mx-auto  w-4/5 mt-20 rounded p-4">
           <img className="w-96 mx-auto my-auto" src={noOrdersFound} />
           <div className="justify-center grid">
-            <h2 className="text-white mx-auto text-5xl">No hay pedidos en entrega</h2>
+            <h2 className="text-white mx-auto text-5xl">
+              No hay pedidos en entrega
+            </h2>
           </div>
         </div>
       </div>
@@ -84,7 +89,7 @@ function MiPedido() {
             />
             <TextField
               variant="standard"
-              value={`${rawPedido.data.pedidos.DEPARTAMENTO},${rawPedido.data.MUNICIPIO},${rawPedido.data.LUGAR}`}
+              value={`${rawPedido.data.pedidos.DEPARTAMENTO},${rawPedido.data.pedidos.MUNICIPIO},${rawPedido.data.pedidos.LUGAR}`}
               size="small"
               className="w-100"
             />
