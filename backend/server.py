@@ -140,7 +140,6 @@ def CrearEmpresa():
         controlador.AgregarSolicitud(id_empresa, None, None, "REGISTRO", datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "Solicitud de creación de usuario de tipo empresa", "PENDIENTE")
         return jsonify({"exito":True, "msg":"Se ha creado su usuario correctamente. Le pedimos que aguarde la confirmación de su cuenta"})
     except Exception as e:
-        controlador.EliminarEmpresa(id_empresa)
         return jsonify({'exito':False, "msg": "Error al crear su usuario: " + str(e)})
 
 #Endpoint para comprobar si la contrasenia y usuario admin son correctos
@@ -641,6 +640,7 @@ def VerCombosPorTipoProduct(tipo):
 def VerPerfilRepartidor(usuario):
     try:
         mes_actual = datetime.now().month
+        print(mes_actual)
         perfil = controlador.VerPerfilRepartidor(usuario, mes_actual)
         return jsonify({"exito":True, "repartidor":perfil})
     except Exception as e:

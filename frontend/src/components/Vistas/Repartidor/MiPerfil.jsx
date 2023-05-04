@@ -60,7 +60,6 @@ function MiPerfil() {
           <div className="ml-auto">
             <h2 className="">
               Comisiones Generadas: Q {rawPerfilData.data.repartidor.COMISION}
-              .00
             </h2>
           </div>
         </div>

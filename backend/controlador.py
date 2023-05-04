@@ -1,4 +1,6 @@
 from types import new_class
+
+from mysql.connector import OperationalError
 from conexion import obtener_conexion
 from werkzeug.security import check_password_hash, generate_password_hash
 import json
@@ -268,8 +270,7 @@ def MostrarOrdenes(id_empresa):
     conexion = obtener_conexion()
     combos = []
     with conexion.cursor() as cursor:
-        cursor.execute("""SELECT o.ORD_ID, c.CLI_ID, CONCAT(c.NOMBRE, ', ', c.APELLIDO) AS NOMBRE_COMPLETO_CLIENTE, d.LUGAR, 
-        r.REP_ID, CONCAT(r.NOMBRE, ', ', r.APELLIDO) AS NOMBRE_COMPLETO_REPARTIDOR, DATE_FORMAT(o.FECHA, '%d/%m/%Y') AS FECHA, o.ESTADO, o.CALIFICACION,
+        cursor.execute("""SELECT o.ORD_ID, c.CLI_ID, CONCAT(c.NOMBRE, ', ', c.APELLIDO) AS NOMBRE_COMPLETO_CLIENTE, d.LUGAR, o.FECHA, o.ESTADO,
         JSON_ARRAYAGG(JSON_OBJECT(
         'ID_ARTICULO', CASE WHEN c2.COM_ID IS NULL THEN p.PRO_ID ELSE c2.COM_ID END, 
         'NOMBRE_ARTICULO', CASE WHEN c2.NOMBRE IS NULL THEN p.NOMBRE ELSE c2.NOMBRE END, 
@@ -279,7 +280,6 @@ def MostrarOrdenes(id_empresa):
         FROM ORDEN o
         INNER JOIN CLIENTE c ON c.CLI_ID = o.CLIENTE_CLI_ID 
         INNER JOIN DIRECCION d ON d.DIR_ID = o.DIRECCION_DIR_ID 
-        INNER JOIN REPARTIDOR r ON r.REP_ID = o.REPARTIDOR_REP_ID 
         INNER JOIN DETALLE_ORDEN do ON do.ORDEN_ORD_ID = o.ORD_ID
         LEFT JOIN COMBO c2 ON c2.COM_ID = do.COMBO_COM_ID 
         LEFT JOIN PRODUCTO p ON p.PRO_ID = do.PRODUCTO_PRO_ID  
@@ -290,7 +290,7 @@ def MostrarOrdenes(id_empresa):
         combos = cursor.fetchall()
         
         if combos:
-            combos = [{"ORD_ID":combo[0], "CLI_ID":combo[1], "NOMBRE_COMPLETO_CLIENTE":combo[2], "LUGAR":combo[3], "REP_ID":combo[4], "NOMBRE_COMPLETO_REPARTIDOR": combo[5], "FECHA": combo[6], "ESTADO": combo[7], "CALIFICACION": combo[8], "DETALLE_ORDEN":json.loads(combo[9])}for combo in combos]
+            combos = [{"ORD_ID":combo[0], "CLI_ID":combo[1], "NOMBRE_COMPLETO_CLIENTE":combo[2], "LUGAR":combo[3], "FECHA": combo[4], "ESTADO": combo[5], "DETALLE_ORDEN":json.loads(combo[6])}for combo in combos]
         else:
             combos = None
     conexion.close()
@@ -734,6 +734,7 @@ def EntregarPedidoRepartidor(ord_id, usuario):
         SET O.ESTADO = 'ENTREGADO'
         WHERE O.ESTADO = 'EN PROCESO' AND O.ORD_ID=%s AND R.REP_ID = %s;""", (ord_id, usuario,))
         conexion.commit()
+
         conexion.close()
 
 def VerTiposProductos():
@@ -1117,26 +1118,39 @@ def RechazarSolicitudes(id_sol):
 #Controlador para obtener el total de los detalles de una orden
 def ObtenerTotalOrden(id_orden):
     conexion = obtener_conexion()
-    with conexion.cursor() as cursor:
-        cursor.execute("""SELECT combotot.TOTAL + prodtot.TOTAL as total FROM (
-
-(SELECT SUM(D.CANTIDAD * P.PRECIO) AS TOTAL FROM DETALLE_ORDEN D 
-        INNER JOIN COMBO P on D.COMBO_COM_ID = P.COM_ID
-        WHERE D.ORDEN_ORD_ID = %s)  AS combotot,
-        
-(SELECT SUM(D.CANTIDAD * P.PRECIO) AS TOTAL FROM DETALLE_ORDEN D 
-        INNER JOIN PRODUCTO P on D.PRODUCTO_PRO_ID = P.PRO_ID
-        WHERE D.ORDEN_ORD_ID = %s)  as prodtot)""",(id_orden,id_orden,))
-        total = cursor.fetchone()[0]
-        return total
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute(""" SELECT IFNULL(combotot.TOTAL, 0)  + IFNULL(prodtot.TOTAL, 0)  as total FROM (
+    (SELECT SUM(D.CANTIDAD * P.PRECIO) AS TOTAL FROM DETALLE_ORDEN D 
+            INNER JOIN COMBO P on D.COMBO_COM_ID = P.COM_ID
+            WHERE D.ORDEN_ORD_ID = %s)  AS combotot,
+    (SELECT SUM(D.CANTIDAD * P.PRECIO) AS TOTAL FROM DETALLE_ORDEN D 
+            INNER JOIN PRODUCTO P on D.PRODUCTO_PRO_ID = P.PRO_ID
+            WHERE D.ORDEN_ORD_ID = %s)  as prodtot);""",(id_orden,id_orden,))
+            total = cursor.fetchone()
+            return total[0]
+    except OperationalError as error:
+        conexion.close()
+        raise error
+    finally:
+        conexion.close()
 
 #Controlador para insertar en la tabla VENTA la orden completada
 def InsertarVenta(id_orden, total):
     conexion = obtener_conexion()
-    with conexion.cursor() as cursor:
-        cursor.execute("""INSERT INTO VENTA(ORDEN_ORD_ID, FECHA, TOTAL) VALUES( %s, NOW(), %s)""",( id_orden, total))
-        conexion.commit()
-        conexion.close()    
+    try:
+        with conexion.cursor() as cursor:
+            print(f"id_orden: {id_orden} total:{total}")
+            cursor.execute("""INSERT INTO VENTA(ORDEN_ORD_ID,FECHA, TOTAL) VALUES( %s, NOW(), %s)""",( id_orden,int(total)))
+            conexion.commit()
+            print('ok')
+    except OperationalError as error:
+        print(f"Error al insertar en la tabla VENTA: {error}")
+        conexion.close()
+        raise error
+    finally:
+        print('cerrando conexion')
+        conexion.close()
 
 #controlador para obtener el numero total de pedidos generados en el mes
 def ObtenerPedidosMes():
