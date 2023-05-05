@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import NavBar from "../../Navbars/NavbarA";
 import { Divider, Header, Table } from 'semantic-ui-react';
+import API_URL from "../../../app/constants";
 
 function Reportes(props) {
   const [ventas, setVentas] = useState([]);
