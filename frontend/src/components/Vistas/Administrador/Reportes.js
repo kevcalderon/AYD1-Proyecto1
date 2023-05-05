@@ -13,7 +13,7 @@ function Reportes(props) {
   const [repartidores1, setRepartidores1] = useState([]);
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5001/Ventas1`)
+      .get(`${API_URL}/Ventas1`)
       .then((res) => {
         setVentas(res.data.msg);
       })
@@ -24,7 +24,7 @@ function Reportes(props) {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5001/Ventas2`)
+      .get(`${API_URL}/Ventas2`)
       .then((res) => {
         setVentas2(res.data.msg);
       })
@@ -35,7 +35,7 @@ function Reportes(props) {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5001/ProductosVendidos`)
+      .get(`${API_URL}/ProductosVendidos`)
       .then((res) => {
         setVentas3(res.data.msg);
       })
@@ -45,7 +45,7 @@ function Reportes(props) {
   }, []);
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5001/TotalClientes`)
+      .get(`${API_URL}/TotalClientes`)
       .then((res) => {
         setUsuarios(res.data.msg);
       })
@@ -55,7 +55,7 @@ function Reportes(props) {
   }, []);
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5001/ClientesActivos`)
+      .get(`${API_URL}/ClientesActivos`)
       .then((res) => {
         setUsuarios1(res.data.msg);
       })
@@ -65,7 +65,7 @@ function Reportes(props) {
   }, []);
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5001/PedidosRepartidor`)
+      .get(`${API_URL}/PedidosRepartidor`)
       .then((res) => {
         setRepartidores(res.data.msg);
       })
@@ -76,7 +76,7 @@ function Reportes(props) {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:5001/PromedioCalificacionRepartidor`)
+      .get(`${API_URL}/PromedioCalificacionRepartidor`)
       .then((res) => {
         setRepartidores1(res.data.msg);
       })
