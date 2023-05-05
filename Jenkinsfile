@@ -1,8 +1,5 @@
 pipeline{
     agent "any"
-    tools {
-        nodejs 'node'
-    }
     stages{
         stage("Checkout"){
             steps{
@@ -27,7 +24,7 @@ pipeline{
                 }
             } 
         }
-        /*stage("App build"){
+        stage("App build"){
             steps{
                 echo "======== executing app frontend build ========"
                 dir('frontend'){
@@ -35,7 +32,7 @@ pipeline{
                     sh 'npm run build'
                 }
             }
-        }*/
+        }
         stage("Docker image build backend"){
             steps{
                 echo "======== executing app docker backend image build ========"
