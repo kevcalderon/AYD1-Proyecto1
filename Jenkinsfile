@@ -13,6 +13,9 @@ pipeline{
         stage("Test"){
             steps{
                 echo "======== executing app tests ========"
+                dir('backend'){
+                    sh 'pytest --cov=controlador test_controlador.py'
+                }
             }
             post{
                 success{
@@ -23,7 +26,7 @@ pipeline{
                 }
             } 
         }
-        stage("App build"){
+        /*stage("App build"){
             steps{
                 echo "======== executing app frontend build ========"
                 dir('frontend'){
@@ -31,7 +34,7 @@ pipeline{
                     sh 'npm run build'
                 }
             }
-        }
+        }*/
         stage("Docker image build backend"){
             steps{
                 echo "======== executing app docker backend image build ========"
@@ -65,11 +68,6 @@ pipeline{
                         dockerImageF.push('latest')
                     }
                 }      
-            }
-        }
-        stage("Deploy"){
-            steps{
-                echo "======== executing app deliver ========"
             }
         }
     }
