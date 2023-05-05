@@ -32,7 +32,7 @@ pipeline{
                 }
             }
         }
-        stage("Docker images build"){
+        stage("Docker image build backend"){
             steps{
                 echo "======== executing app docker backend image build ========"
                 dir('backend'){
@@ -41,6 +41,8 @@ pipeline{
                     }
                 }
             }
+        }
+        stage("Docker image build frontend"){
             steps{
                 echo "======== executing app docker frontend image build ========"
                 dir('frontend'){
