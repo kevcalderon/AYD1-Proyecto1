@@ -29,6 +29,7 @@ pipeline{
                 echo "======== executing app frontend build ========"
                 dir('frontend'){
                     sh 'npm install'
+                    sh 'npm ci --silent'
                     sh 'npm run build'
                 }
             }
