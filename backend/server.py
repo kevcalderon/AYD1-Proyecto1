@@ -996,8 +996,79 @@ def Top5ProductosMasVendidos(id_empresa):
     except Exception as e:
         return jsonify({'exito':False, "msg": "Error al mostar la informacion: " + str(e)})
 
+
+
+@app.route('/Ventas1', methods=['GET'])
+def Ventaas():
+    try:
+        info = controlador.VentasXD()
+        return jsonify({"exito":True, "msg":info})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar la informacion: " + str(e)})
+
+
+@app.route('/Ventas2', methods=['GET'])
+def Ventas():
+    try:
+        info = controlador.ObtenerVentas()
+        return jsonify({"exito":True, "msg":info})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar la informacion: " + str(e)})
+
+
+
+
+@app.route('/ProductosVendidos', methods=['GET'])
+def ObtenerProductosVendido():
+    try:
+        productos = controlador.ProductosMasVendidos()
+        return jsonify({"exito":True, "msg":productos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los productos mas vendidos: " + str(e)})
+
+
+
+@app.route('/TotalClientes', methods=['GET'])
+def TotalClientes():
+    try:
+        clientes = controlador.TotalClientes()
+        return jsonify({"exito":True, "msg":clientes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los clientes: " + str(e)})
+
+
+@app.route('/ClientesActivos', methods=['GET'])
+def ClientesActivo():
+    try:
+        clientes = controlador.ClientesActivos()
+        return jsonify({"exito":True, "msg":clientes})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los clientes: " + str(e)})
+
+
+
+@app.route('/PedidosRepartidor', methods=['GET'])
+def PedidosRepartidor():
+    try:
+        pedidos = controlador.PedidosRepartidor()
+        return jsonify({"exito":True, "msg":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los pedidos: " + str(e)})
+
+
+'''
+enporint PromedioCalificacionRepartidor
+'''
+@app.route('/PromedioCalificacionRepartidor', methods=['GET'])
+def PromedioCalificacionRepartido():
+    try:
+        pedidos = controlador.PromedioCalificacion()
+        return jsonify({"exito":True, "msg":pedidos})
+    except Exception as e:
+        return jsonify({'exito':False, "msg": "Error al mostar los pedidos: " + str(e)})
+
 if __name__ == '__main__':
     print("SERVIDOR INICIADO EN EL PUERTO: 5000")
 
     # serve(app, port=5000)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)

@@ -1363,3 +1363,105 @@ def Top5ProductosMasVendidos(id_empresa):
     conexion.close()
     return registros
 
+
+
+def VentasXD():
+    print("hola")
+    conexion = obtener_conexion()
+    cantidades = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT ORDEN.ORD_ID,EMPRESA.NOMBRE AS EMPRESA, SUM(PRODUCTO.PRECIO * DETALLE_ORDEN.CANTIDAD) AS TOTAL
+                        FROM ORDEN
+                        JOIN CLIENTE ON ORDEN.CLIENTE_CLI_ID = CLIENTE.CLI_ID
+                        JOIN DETALLE_ORDEN ON ORDEN.ORD_ID = DETALLE_ORDEN.ORDEN_ORD_ID
+                        JOIN PRODUCTO ON DETALLE_ORDEN.PRODUCTO_PRO_ID = PRODUCTO.PRO_ID
+                        JOIN EMPRESA ON PRODUCTO.EMPRESA_EMP_ID = EMPRESA.EMP_ID
+                        GROUP BY EMPRESA.NOMBRE;""")
+        cantidades= cursor.fetchall()
+        conexion.close()
+        return [{"id":str(cantidad[0]), "empresa":str(cantidad[1]), "total":str(cantidad[2])}for cantidad in cantidades]
+
+    
+
+def ObtenerVentas():
+
+    conexion = obtener_conexion()
+    cantidades = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT ORDEN_ORD_ID, SUM(PRECIO * CANTIDAD) AS VALOR_VENTA
+                        FROM DETALLE_ORDEN
+                        INNER JOIN PRODUCTO ON DETALLE_ORDEN.PRODUCTO_PRO_ID = PRODUCTO.PRO_ID
+                        GROUP BY ORDEN_ORD_ID;""")
+        cantidades= cursor.fetchall()
+        conexion.close()
+        return [{"id":str(cantidad[0]), "total":str(cantidad[1])}for cantidad in cantidades]
+
+
+def ProductosMasVendidos():
+
+    conexion = obtener_conexion()
+    cantidades = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT 
+                            p.PRO_ID,
+                            p.NOMBRE,
+                            SUM(d.CANTIDAD) AS TOTAL_VENDIDO
+                            FROM
+                            PRODUCTO p
+                            INNER JOIN DETALLE_ORDEN d ON p.PRO_ID = d.PRODUCTO_PRO_ID
+                            GROUP BY
+                            p.PRO_ID
+                            ORDER BY
+                            TOTAL_VENDIDO DESC;""")
+        cantidades= cursor.fetchall()
+        conexion.close()
+        return [{"id":str(cantidad[0]), "nombre":str(cantidad[1]), "total":str(cantidad[2])}for cantidad in cantidades]
+
+
+
+def TotalClientes():
+    conexion = obtener_conexion()
+    cantidades = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(*) AS total_clientes FROM CLIENTE;""")
+        cantidades= cursor.fetchall()
+        conexion.close()
+        return [{"total":str(cantidad[0])}for cantidad in cantidades]
+
+
+ 
+def ClientesActivos():
+    conexion = obtener_conexion()
+    cantidades = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(*) AS total_clientes FROM CLIENTE WHERE LOWER(ESTADO) = 'activo';""")
+        cantidades= cursor.fetchall()
+        conexion.close()
+        return [{"total":str(cantidad[0])}for cantidad in cantidades]
+
+
+def PedidosRepartidor():
+    conexion = obtener_conexion()
+    cantidades = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT COUNT(*) AS num_pedidos, REPARTIDOR_REP_ID, CONCAT(R.NOMBRE, " ",R.APELLIDO) AS NOMBRE
+                        FROM ORDEN
+                        INNER JOIN REPARTIDOR R ON R.REP_ID = ORDEN.REPARTIDOR_REP_ID 
+                        WHERE REPARTIDOR_REP_ID IS NOT NULL;""")
+        cantidades= cursor.fetchall()
+        conexion.close()
+        return [{"id":str(cantidad[1]), "nombre":str(cantidad[2]), "total":str(cantidad[0])}for cantidad in cantidades]
+
+
+
+def PromedioCalificacion():
+    conexion = obtener_conexion()
+    cantidades = None
+    with conexion.cursor() as cursor:
+        cursor.execute("""SELECT REP_ID, AVG(CALIFICACION) AS PROMEDIO_CALIFICACION, CONCAT(REPARTIDOR.NOMBRE, " ",REPARTIDOR.APELLIDO) AS NOMBRE
+                        FROM REPARTIDOR
+                        LEFT JOIN ORDEN ON REPARTIDOR.REP_ID = ORDEN.REPARTIDOR_REP_ID
+                        GROUP BY REP_ID;""")
+        cantidades= cursor.fetchall()
+        conexion.close()
+        return [{"id":str(cantidad[0]), "nombre":str(cantidad[2]), "promedio":str(cantidad[1])}for cantidad in cantidades]
