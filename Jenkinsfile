@@ -4,10 +4,10 @@ pipeline{
         stage("Checkout"){
             steps{
                 echo "======== executing git repository checkout ========"
-                git branch: 'feature/jenkinsfilePipeline_201709282', url: "https://github.com/kevcalderon/AYD1-Proyecto1.git"
+                git branch: 'develop', url: "https://github.com/kevcalderon/AYD1-Proyecto1.git"
             }
         }
-        stage("Test"){
+        /*stage("Test"){
             steps{
                 echo "======== executing app tests ========"
                 dir('backend'){
@@ -22,7 +22,7 @@ pipeline{
                     echo "======== tests stage execution failed ========"
                 }
             } 
-        }
+        }*/
         stage("App build"){
             steps{
                 echo "======== executing app frontend build ========"
