@@ -11,8 +11,6 @@ pipeline{
             steps{
                 echo "======== executing app tests ========"
                 dir('backend'){
-                    sh 'pip install -r requirements.txt'
-                    sh 'pip install pytest'
                     sh 'pytest --cov=controlador test_controlador.py'
                 }
             }
