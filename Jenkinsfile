@@ -27,7 +27,6 @@ pipeline{
             steps{
                 echo "======== executing app frontend build ========"
                 dir('frontend'){
-                    sh "export PATH=/Users/carlos/.nvm/versions/node/v18.7.0/bin:$PATH"
                     sh 'npm install'
                     sh 'npm run build'
                 }
