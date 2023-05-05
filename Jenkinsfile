@@ -12,7 +12,8 @@ pipeline{
                 echo "======== executing app tests ========"
                 dir('backend'){
                     sh 'pip install -r requirements.txt'
-                    //sh 'pytest --cov=controlador test_controlador.py'
+                    sh 'pip install pytest'
+                    sh 'pytest --cov=controlador test_controlador.py'
                 }
             }
             post{
@@ -28,7 +29,6 @@ pipeline{
             steps{
                 echo "======== executing app frontend build ========"
                 dir('frontend'){
-                    sh 'npm install'
                     sh 'npm ci --silent'
                     sh 'npm run build'
                 }
